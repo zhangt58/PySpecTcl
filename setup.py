@@ -13,7 +13,7 @@ extra_require = {
 
 setup(
         name='pyspectcl',
-        version='0.0.1',
+        version='0.0.2',
         description='Python interface to SpecTcl server',
         author='Tong Zhang',
         author_email='zhangt@frib.msu.edu',
