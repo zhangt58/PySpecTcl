@@ -22,13 +22,18 @@ class NotFoundSpecTclDataError(Exception):
 
 
 ACTION_PARAMS = {
+    # service group:
+    #   operation: (params)
     'spectrum': {
         'contents': ('name',),
-        'list': ('filter',),
+        'list': ('filter'),
         'delete': ('name', ),
         'create': ('name', 'type', 'parameters', 'axes', 'chantype'),
         'clear': ('pattern',),
     },
+    'parameter': {
+        'list': ('filter',),
+    }
 }
 
 

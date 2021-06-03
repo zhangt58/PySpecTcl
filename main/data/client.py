@@ -7,10 +7,13 @@ from .utils import make_response
 from .utils import ACTION_PARAMS
 
 
+DEFAULT_APP_NAME = 'spectcl'
 DEFAULT_BASE_URL = 'http://127.0.0.1'
 DEFAULT_PORT_NUMBER = 8000
 DEFAULT_GROUP_NAME = 'spectrum'
+
 JSON_HEADERS = {"Content-Type": "application/json"}
+
 
 class SpecTclDataClient(object):
     """Client for data retrieval.
@@ -25,11 +28,24 @@ class SpecTclDataClient(object):
         Service group name, default is 'spectrum'.
     """
     def __init__(self, base_url=DEFAULT_BASE_URL,
-                 port=DEFAULT_PORT_NUMBER, group=DEFAULT_GROUP_NAME):
+                 port=DEFAULT_PORT_NUMBER, group=DEFAULT_GROUP_NAME,
+                 name=DEFAULT_APP_NAME):
+        self.name = name
         self._base_url = base_url
         self._port = port
         self._group = group
         self.update_base_uri()
+
+    @property
+    def name(self):
+        return self._name  # default is spectcl
+
+    @name.setter
+    def name(self, s):
+        if s is None:
+            self._name = DEFAULT_APP_NAME
+        else:
+            self._name = s
 
     @property
     def port(self):
@@ -61,8 +77,7 @@ class SpecTclDataClient(object):
     def update_base_uri(self):
         """Update base uri.
         """
-        self._base_uri = "{}:{}/spectcl/{}".format(self._base_url,
-                                           self._port, self._group)
+        self._base_uri = f"{self.base_url}:{self.port}/{self.name}/{self.group}"
 
     def get(self, action, **action_params):
         """Retrieve data from SpecTcl service, return as a dict.
