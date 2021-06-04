@@ -1,1 +1,1 @@
-# pyspectcl
+# PySpecTcl
