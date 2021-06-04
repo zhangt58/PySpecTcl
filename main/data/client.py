@@ -4,9 +4,8 @@ import pandas as pd
 import requests
 from simplejson import JSONDecodeError
 
-from .utils import make_response
 from .utils import ACTION_PARAMS
-
+from .utils import make_response
 
 DEFAULT_APP_NAME = 'spectcl'
 DEFAULT_BASE_URL = 'http://127.0.0.1'

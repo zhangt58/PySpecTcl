@@ -1,1 +1,1 @@
-from spectcl.data import SpecTclDataClient
+from spectcl.data import SpecTclDataClient as DataClient
