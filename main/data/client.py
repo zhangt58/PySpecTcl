@@ -159,6 +159,27 @@ class SpecTclDataClient(object):
                 df.rename(columns={'x': params[0], 'y': params[1], 'v': 'count'}, inplace=True)
             return df
 
+    def parameters(self, name):
+        """Convenient method to return the parameters of a spectrum defined
+        by *name*.
+
+        Parameters
+        ----------
+        name : str
+            Name of spectrum configuration.
+
+        Returns
+        -------
+        r : list
+            A list of parameters, return None for non-existing spectrum.
+        """
+        try:
+            conf = self._vlist_cache.loc[name]
+        except KeyError:
+            return None
+        else:
+            return conf.Parameters
+
     def validate_action(self, action, action_params):
         params = ACTION_PARAMS[self._group][action]
         for i in action_params:
