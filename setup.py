@@ -11,20 +11,45 @@ extra_require = {
     'doc': ['sphinx', 'pydata_sphinx_theme'],
 }
 
+def set_entry_points():
+    r = {}
+#    r['console_scripts'] = [
+#        'fetch_mach_state=phantasy_apps.msviz.tools:main',
+#    ]
+
+    r['gui_scripts'] = [
+        'spectcl_viz=spectcl.apps.viz:run',
+    ]
+    return r
+
 setup(
-        name='pyspectcl',
-        version='0.0.4',
-        description='Python interface to SpecTcl server',
-        author='Tong Zhang',
-        author_email='zhangt@frib.msu.edu',
-        packages=['spectcl.data',
-                  'spectcl.client',
-                  'spectcl'],
-        package_dir={
-            'spectcl.data' : 'main/data',
-            'spectcl.client': 'main/client',
-            'spectcl': 'main'
-        },
-        install_requires=install_requires,
-        extra_require=extra_require,
+    name='pyspectcl',
+    version='0.0.4',
+    description='Python interface to SpecTcl server',
+    author='Tong Zhang',
+    author_email='zhangt@frib.msu.edu',
+    packages=[
+        'spectcl.apps',
+        'spectcl.apps.viz',
+        'spectcl.apps.viz.ui',
+        'spectcl.contrib',
+        'spectcl.data',
+        'spectcl.client',
+        'spectcl'],
+    package_dir={
+        'spectcl.apps': 'main/apps',
+        'spectcl.apps.viz': 'main/apps/viz',
+        'spectcl.apps.viz.ui': 'main/apps/viz/ui',
+        'spectcl.contrib': 'main/contrib',
+        'spectcl.data' : 'main/data',
+        'spectcl.client': 'main/client',
+        'spectcl': 'main'
+    },
+    install_requires=install_requires,
+    extra_require=extra_require,
+    entry_points=set_entry_points(),
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Scientific/Engineering :: Physics'],
 )
