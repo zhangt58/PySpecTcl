@@ -15,6 +15,14 @@ DEFAULT_GROUP_NAME = 'spectrum'
 
 JSON_HEADERS = {"Content-Type": "application/json"}
 
+SPEC_NAME_MAP = {
+    'name': 'Name',
+    'type': 'Type',
+    'parameters': 'Parameters',
+    'axes': 'Axes',
+    'chantype': 'ChanType'
+}
+
 
 class SpecTclDataClient(object):
     """Client for data retrieval.
@@ -25,12 +33,10 @@ class SpecTclDataClient(object):
         Base url for data retrieval API, default is 'http://127.0.0.1'.
     port : int
         Port number for service, default is 8000.
-    group : str
-        Service group name, default is 'spectrum'.
     """
     def __init__(self, base_url=DEFAULT_BASE_URL,
-                 port=DEFAULT_PORT_NUMBER, group=DEFAULT_GROUP_NAME,
-                 name=DEFAULT_APP_NAME):
+                 port=DEFAULT_PORT_NUMBER, name=DEFAULT_APP_NAME,
+                 group=DEFAULT_GROUP_NAME):
         self.name = name
         self._base_url = base_url
         self._port = port
@@ -51,21 +57,16 @@ class SpecTclDataClient(object):
             self._name = s
 
     @property
+    def group(self):
+        return self._group
+
+    @property
     def port(self):
         return self._port
 
     @port.setter
     def port(self, i):
         self._port = i
-        self.update_base_uri()
-
-    @property
-    def group(self):
-        return self._group
-
-    @group.setter
-    def group(self, s):
-        self._group = s
         self.update_base_uri()
 
     @property
@@ -123,9 +124,8 @@ class SpecTclDataClient(object):
             Table of spectrum configurations.
         """
         r = self.get("list", **kws)
-        df = pd.DataFrame(columns=['Name', 'Type', 'Parameters', 'Axes', 'ChanType'])
-        for i, v in enumerate(r):
-            df.loc[i] = v['name'], v['type'], v['parameters'], v['axes'], v['chantype']
+        df = pd.DataFrame.from_records(r)
+        df.rename(columns=SPEC_NAME_MAP, inplace=True)
         df.set_index('Name', inplace=True)
         if kws.get('update_cache', False):
             self._vlist_cache = df
@@ -212,15 +212,42 @@ class SpecTclDataClient(object):
     def validate_action(self, action, action_params):
         params = ACTION_PARAMS[self._group][action]
         for i in action_params:
-            if i not in params:
+            if i not in params['arg']:
                 print('-- {} is not a valid action parameter.'.format(i))
                 print("-- Valid action Parameters of {}: {}".format(self._group, ','.join(params)))
                 return False
         return True
 
-
     def __repr__(self):
-        return "[Data Client] SpecTcl REST Service on: {}:{}/spectcl".format(self._base_url, self._port)
+        return f"[Data Client] SpecTcl REST Service on: {self._base_uri}"
+
+
+class SpecTclGateClient(SpecTclDataClient):
+    """Client for gate service group.
+    """
+    def __init__(self, base_url=DEFAULT_BASE_URL, port=DEFAULT_PORT_NUMBER,
+                 name=DEFAULT_APP_NAME):
+        super(self.__class__, self).__init__(base_url, port, name, "gate")
+
+    def list(self, **kws):
+        """List defined gates.
+
+        Keyword Arguments
+        -----------------
+        pattern : str
+            Unix wildcard pattern as the name filter.
+        update_cache : bool
+            If set, update the cached value for gate configurations.
+
+        Returns
+        -------
+        r : DataFrame
+            Table of gate configurations.
+        """
+        r = self.get("list", **kws)
+
+        return None
+
 
 
 if __name__ == '__main__':
