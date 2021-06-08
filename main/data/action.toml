@@ -1,37 +1,28 @@
 # [Service group name]
-# 
+#
 
 [parameter]
-
     [parameter.list]
     arg = ["filter"]
     column = ["name", "id", "bins", "low", "hi", "units"]
-
     [parameter.edit]
     arg = ["name", "bins", "low", "high", "units"]
     column = []
-
     [parameter.promote]
     arg = ["name", "low", "high", "bins", "units"]
     column = []
 
-
 [spectrum]
-
     [spectrum.list]
     arg = ["filter"]
     column = ["name", "type", "parameters", "axes", "chantype"]
-
     [spectrum.delete]
     arg = ["name"]
     column = []
-    
     [spectrum.create]
     arg = ["name", "type", "parameters", "axes", "chantype"]
-
     [spectrum.clear]
     arg = ["pattern"]
-
     [spectrum.contents]
     arg = ["name"]
     column = ["x", "y", "v"]
@@ -41,7 +32,5 @@
     [gate.list]
     arg = ["pattern"]
     column = ["name", "type"]
-    
     [gate.delete]
     [gate.edit]
-
