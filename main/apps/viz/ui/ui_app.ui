@@ -91,7 +91,35 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="MatplotlibImageWidget" name="matplotlibimageWidget"/>
+         <widget class="MatplotlibImageWidget" name="matplotlibimageWidget">
+          <property name="figureXYlabelFont">
+           <font>
+            <family>sans-serif</family>
+            <pointsize>18</pointsize>
+            <weight>50</weight>
+            <italic>false</italic>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="figureTitleFont">
+           <font>
+            <family>sans-serif</family>
+            <pointsize>22</pointsize>
+            <weight>50</weight>
+            <italic>false</italic>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="figureXYticksFont">
+           <font>
+            <family>sans-serif</family>
+            <pointsize>14</pointsize>
+            <weight>50</weight>
+            <italic>false</italic>
+            <bold>false</bold>
+           </font>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
