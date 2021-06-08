@@ -45,6 +45,7 @@ setup(
         'spectcl.client': 'main/client',
         'spectcl': 'main'
     },
+    include_package_data=True,
     install_requires=install_requires,
     extra_require=extra_require,
     entry_points=set_entry_points(),
