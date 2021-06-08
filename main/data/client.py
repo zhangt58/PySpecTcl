@@ -6,6 +6,7 @@ from simplejson import JSONDecodeError
 
 from .utils import ACTION_PARAMS
 from .utils import make_response
+from .utils import Spectrum
 
 DEFAULT_APP_NAME = 'spectcl'
 DEFAULT_BASE_URL = 'http://127.0.0.1'
@@ -140,24 +141,52 @@ class SpecTclDataClient(object):
 
         Keyword Arguments
         -----------------
+        as_raw : bool
+            If set, return data with original column names.
         refresh_cache : bool
             If set, refresh the cache of spectra info.
+        Other arguments that client.get('contents') supports.
         """
+        as_raw = kws.pop('as_raw', False)
+        refresh_cache = kws.pop('refresh_cache', False)
         try:
             data = self.get("contents", name=name, **kws)
         except JSONDecodeError:
             return None
         else:
             df = pd.DataFrame.from_dict(data['channels'])
-            if kws.get('refresh_cache', False):
+            if refresh_cache:
                 self.list()
             spec_conf = self._vlist_cache.loc[name]
-            params = spec_conf.Parameters
-            if len(params) == 1: # type '1'
-                df.rename(columns={'x': params[0], 'v': 'count'}, inplace=True)
-            elif len(params) == 2: # type '2'
-                df.rename(columns={'x': params[0], 'y': params[1], 'v': 'count'}, inplace=True)
+            if not as_raw:
+                params = spec_conf.Parameters
+                if len(params) == 1: # type '1'
+                    df.rename(columns={'x': params[0], 'v': 'count'}, inplace=True)
+                elif len(params) == 2: # type '2'
+                    df.rename(columns={'x': params[0], 'y': params[1], 'v': 'count'}, inplace=True)
             return df
+
+    def get_spectrum(self, name, **kws):
+        """Return a instance of Spectrum for spectrum of the name defined by *name*.
+
+        Parameters
+        ----------
+        name : str
+            Name of the spectrum.
+
+        Keyword Arguments
+        -----------------
+        refresh_cache : bool
+            If set, refresh the cache of spectra info.
+
+        Returns:
+        r : Spectrum
+            Spectrum instance.
+        """
+        kws.pop('as_raw', None)
+        data = self.contents(name, as_raw=True, **kws)
+        conf = self._vlist_cache.loc[name]
+        return Spectrum(name, conf, data)
 
     def parameters(self, name):
         """Convenient method to return the parameters of a spectrum defined
