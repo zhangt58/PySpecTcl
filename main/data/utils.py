@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import toml
 import numpy as np
+import pathlib
 from requests.adapters import HTTPAdapter
 from spectcl.contrib import to_image_tuple
+
+CDIR_PATH = pathlib.Path(__file__).parent
 
 
 DTYPE_MAP = {
@@ -124,17 +128,4 @@ class Spectrum(object):
         return to_image_tuple(self.data)
 
 
-ACTION_PARAMS = {
-    # service group:
-    #   operation: (params)
-    'spectrum': {
-        'contents': ('name',),
-        'list': ('filter'),
-        'delete': ('name',),
-        'create': ('name', 'type', 'parameters', 'axes', 'chantype'),
-        'clear': ('pattern',),
-    },
-    'parameter': {
-        'list': ('filter',),
-    }
-}
+ACTION_PARAMS = toml.load(CDIR_PATH.joinpath("action.toml"))
