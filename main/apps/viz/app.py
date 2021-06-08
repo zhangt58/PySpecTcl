@@ -79,22 +79,13 @@ class MyAppWindow(BaseAppForm, Ui_MainWindow):
         #
         self.image_updated.connect(self.on_image_updated)
 
-        self.cb = None
-
     def on_image_updated(self, x, y, z):
         # image updated
+        print(x.shape, y.shape, z.shape)
         o = self.matplotlibimageWidget
         o.setXData(x)
         o.setYData(y)
         o.update_image(z)
-        
-        if self.cb is not None:
-            self.cb.remove()
-            self.cb = None
-
-        self.cb = o.figure.colorbar(o._spath, aspect=20, shrink=0.95, pad=0.08, fraction=0.05)
-        self.cb.ax.zorder = -1
-
 
     @pyqtSlot()
     def on_update_data(self):
@@ -117,27 +108,24 @@ class MyAppWindow(BaseAppForm, Ui_MainWindow):
             self.ylabel_updated2.emit(xylabels[1])
             self.title_updated2.emit(self.title)
 
-
     def fetch_data(self):
         name = self.spectrum_cbb.currentText()
-        data = self.client.get('contents', name=name)
-        df = pd.DataFrame.from_dict(data['channels'])
-        # spectrum type
-        stype = self.spectra_dict[name][0]
+        spec = self.client.get_spectrum(name)
         # spectrum params
-        self.sparam = self.spectra_dict[name][1]
+        self.sparam = spec.parameters
         self.title = name
-        if stype in ('1', 'S',):
+        df = spec.data
+        if spec.stype == '2D':
+            self.tabWidget.setCurrentIndex(1)
+            x, y, z = spec.to_image_tuple()
+            return x, y, z
+        elif spec.stype == '1D':
             self.tabWidget.setCurrentIndex(0)
             x = df.x.to_numpy()
             y = df.v.to_numpy()
             return x, y, None
-        elif stype == '2':
-            self.tabWidget.setCurrentIndex(1)
-            x = df.x.to_numpy()
-            y = df.y.to_numpy()
-            z = df.v.to_numpy()
-            return x, y, z
+        else:
+            return None, None, None
 
     @pyqtSlot()
     def on_update_url(self):
