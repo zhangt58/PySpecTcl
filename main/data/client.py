@@ -23,6 +23,31 @@ SPEC_NAME_MAP = {
     'chantype': 'ChanType'
 }
 
+GATE_NAME_MAP = {
+    'name': 'Name',
+    'type': 'Type',
+    'parameters': 'Parameters',
+    'low': 'Low',
+    'high': 'High',
+    'points': 'Points',
+    'gates': 'Gates'
+}
+
+GATE_TYPE_MAP = {
+    '+': 'Or',
+    '-': 'Not',
+    '*': 'And',
+    's': 'Slice',
+    'b': 'Band',
+    'c': 'Contour',
+    'gs': 'Gamma Slice',
+    'gb': 'Gamma Band',
+    'gc': 'Gamma Contour',
+    'em': 'Equal Mask',
+    'am': 'And Mask',
+    'nm': 'Andnot Mask'
+}
+
 
 class SpecTclDataClient(object):
     """Client for data retrieval.
@@ -245,9 +270,12 @@ class SpecTclGateClient(SpecTclDataClient):
             Table of gate configurations.
         """
         r = self.get("list", **kws)
-
-        return None
-
+        df = pd.DataFrame.from_records(r)
+        df.rename(columns=GATE_NAME_MAP, inplace=True)
+        df.set_index('Name', inplace=True)
+        if kws.get('update_cache', False):
+            self._vlist_cache = df
+        return df
 
 
 if __name__ == '__main__':
