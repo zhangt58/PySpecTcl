@@ -1,6 +1,6 @@
 from spectcl.client import *
 
-__version__ = '0.0.4'
+__version__ = '0.1.0'
 __author__ = 'Tong Zhang <zhangt@frib.msu.edu>'
 __name__ = "PySpecTcl"
 __doc__ ="""Python interface to SpecTcl REST server."""
