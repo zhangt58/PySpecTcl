@@ -129,3 +129,38 @@ class Spectrum(object):
 
 
 ACTION_PARAMS = toml.load(CDIR_PATH.joinpath("action.toml"))
+
+SPEC_NAME_MAP = {
+    'name': 'Name',
+    'type': 'Type',
+    'parameters': 'Parameters',
+    'axes': 'Axes',
+    'chantype': 'ChanType'
+}
+
+GATE_NAME_MAP = {
+    'name': 'Name',
+    'type': 'Type',
+    'parameters': 'Parameters',
+    'low': 'Low',
+    'high': 'High',
+    'points': 'Points',
+    'gates': 'Gates'
+}
+
+GATE_TYPE_MAP = {
+    '+': 'Or',
+    '-': 'Not',
+    '*': 'And',
+    's': 'Slice',
+    'b': 'Band',
+    'c': 'Contour',
+    'gs': 'Gamma Slice',
+    'gb': 'Gamma Band',
+    'gc': 'Gamma Contour',
+    'em': 'Equal Mask',
+    'am': 'And Mask',
+    'nm': 'Andnot Mask',
+    'T': 'True',
+    'F': 'False'
+}

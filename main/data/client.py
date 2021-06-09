@@ -7,6 +7,9 @@ from simplejson import JSONDecodeError
 from .utils import ACTION_PARAMS
 from .utils import make_response
 from .utils import Spectrum
+from .utils import GATE_NAME_MAP
+from .utils import GATE_TYPE_MAP
+from .utils import SPEC_NAME_MAP
 
 DEFAULT_APP_NAME = 'spectcl'
 DEFAULT_BASE_URL = 'http://127.0.0.1'
@@ -14,39 +17,6 @@ DEFAULT_PORT_NUMBER = 8000
 DEFAULT_GROUP_NAME = 'spectrum'
 
 JSON_HEADERS = {"Content-Type": "application/json"}
-
-SPEC_NAME_MAP = {
-    'name': 'Name',
-    'type': 'Type',
-    'parameters': 'Parameters',
-    'axes': 'Axes',
-    'chantype': 'ChanType'
-}
-
-GATE_NAME_MAP = {
-    'name': 'Name',
-    'type': 'Type',
-    'parameters': 'Parameters',
-    'low': 'Low',
-    'high': 'High',
-    'points': 'Points',
-    'gates': 'Gates'
-}
-
-GATE_TYPE_MAP = {
-    '+': 'Or',
-    '-': 'Not',
-    '*': 'And',
-    's': 'Slice',
-    'b': 'Band',
-    'c': 'Contour',
-    'gs': 'Gamma Slice',
-    'gb': 'Gamma Band',
-    'gc': 'Gamma Contour',
-    'em': 'Equal Mask',
-    'am': 'And Mask',
-    'nm': 'Andnot Mask'
-}
 
 
 class SpecTclDataClient(object):
@@ -271,6 +241,7 @@ class SpecTclGateClient(SpecTclDataClient):
         """
         r = self.get("list", **kws)
         df = pd.DataFrame.from_records(r)
+        df['Desc'] = df['type'].apply(lambda i: GATE_TYPE_MAP[i])
         df.rename(columns=GATE_NAME_MAP, inplace=True)
         df.set_index('Name', inplace=True)
         if kws.get('update_cache', False):
