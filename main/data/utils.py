@@ -39,20 +39,34 @@ class NotFoundSpecTclDataError(Exception):
 
 
 class Spectrum(object):
-    """Spectrum class, including:
-    - configuration, or definition
-    - parameters
-    - type
-    - axes
-    - data, x, v or x, y, v
+    """Class for spectrum configuration and data.
+
+    Parameters
+    ----------
+    name : str
+        Name of the spectrum.
+    conf : DataFrame
+        Spectrum definition, columns: Type, Parameters, Axes, ChanType.
+    data : DataFrame
+        Spectrum contents, columns of x, v or x, y, v.
+
+    Keyword Arguments
+    -----------------
+    map : bool
+        If do coordinate mapping from channel to world, by default is True.
     """
     def __init__(self, name, conf, data, **kws):
-        self.name = name
+        self._axes_values_channel = [] # list of arrays for all axes in channel coordinate
+        self._axes_values_world = []   # list of arrays for all axes in world coordinate
+        self.name = name # == conf.index.values[0]
         self.data = data
         self.parameters = conf.Parameters
         self.axes = conf.Axes
         self.stype = conf.Type
         self.dtype = conf.ChanType
+        # map axes?
+        if kws.get('map', True):
+            self.map_data()
 
     @property
     def name(self):
@@ -73,6 +87,20 @@ class Spectrum(object):
     @data.setter
     def data(self, data):
         self._data = data
+        if 'x' in data:
+            _x = np.arange(data.x.max() + 1)
+            self._axes_values_channel.append(_x)
+        if 'y' in data:
+            _y = np.arange(data.y.max() + 1)
+            self._axes_values_channel.append(_y)
+
+    def get_axes_values(self, map=True):
+        """Return a list of value of array for all axes.
+        """
+        if map:
+            return self._axes_values_world
+        else:
+            return self._axes_values_channel
 
     @property
     def parameters(self):
@@ -122,10 +150,39 @@ class Spectrum(object):
         dfhtml = self._data._repr_html_(*args, **kws)
         return f'<h4>{str(self)}</h4>' + '<br>' + dfhtml
 
-    def to_image_tuple(self):
+    def to_image_tuple(self, **kws):
         """Return spectral data as the tuple of x,y,z image.
+
+        Parameters
+        ----------
+        nan_as_num : float
+            Fill empty with nan (default) or a defined number.
+        map : bool
+            If do coordinate mapping from channel to world, by default is True.
         """
-        return to_image_tuple(self.data)
+        if self.stype != '2D':
+            print(f"Spectrum {self.name} is not 2D type.")
+            return None
+        if kws.pop('map', True):
+            _x, _y = self._axes_values_world
+        else:
+            _x, _y = self._axes_values_channel
+        return to_image_tuple(self.data, x=_x, y=_y, **kws)
+
+    def map_data(self, **kws):
+        """Map data from channel coordinate to world coordinate.
+
+        Keyword Arguments
+        -----------------
+        force : bool
+            If set, refresh the world coordinate values, otherwise override the existing one.
+        """
+        if kws.get('force', False):
+            return self._axes_values_world
+        self._axes_values_world = []
+        for ax, v in zip(self.axes, self._axes_values_channel):
+            low, high, bins = ax['low'], ax['high'], ax['bins']
+            self._axes_values_world.append(low + v * (high - low) / bins)
 
 
 ACTION_PARAMS = toml.load(CDIR_PATH.joinpath("action.toml"))
