@@ -159,6 +159,13 @@ class Spectrum(object):
             Fill empty with nan (default) or a defined number.
         map : bool
             If do coordinate mapping from channel to world, by default is True.
+
+        Returns
+        -------
+        r : tuple
+            A tuple of ndarray for MatplotlibImageWidget, ``(xx, yy, zz)``,
+            with the same shape, ``zz`` could be used to update the image,
+            ``xx`` and ``yy`` are 2D array for extent, or None.
         """
         if self.stype != '2D':
             print(f"Spectrum {self.name} is not 2D type.")
@@ -183,6 +190,7 @@ class Spectrum(object):
         for ax, v in zip(self.axes, self._axes_values_channel):
             low, high, bins = ax['low'], ax['high'], ax['bins']
             self._axes_values_world.append(low + v * (high - low) / bins)
+
 
 
 ACTION_PARAMS = toml.load(CDIR_PATH.joinpath("action.toml"))
