@@ -11,7 +11,7 @@ from pandas import DataFrame
 import numpy as np
 
 
-def to_image_tuple(df: DataFrame) -> tuple:
+def to_image_tuple(df: DataFrame, nan_as_num: float=None, **kws) -> tuple:
     """Process the spectrum data of x, y, v to three 2D array that
     could be visualized in `mpl4qt.MatplotlibImageWidget`.
 
@@ -19,6 +19,15 @@ def to_image_tuple(df: DataFrame) -> tuple:
     ----------
     df : DataFrame
         Data of spectrum with x, y, v columns.
+    nan_as_num : float
+        Fill empty with nan (default) or a defined number.
+
+    Keyword Arguments
+    -----------------
+    x : ndarray
+        1D array for x axis, use df.x to build by default.
+    y : ndarray
+        1D array for y axes, use df.y to build by default.
 
     Returns
     -------
@@ -27,11 +36,15 @@ def to_image_tuple(df: DataFrame) -> tuple:
         with the same shape, ``zz`` could be used to update the image,
         ``xx`` and ``yy`` are 2D array for extent.
     """
-    x = np.arange(df.x.max() + 1)
-    y = np.arange(df.y.max() + 1)
+    if nan_as_num is None:
+        vfill = np.nan
+    else:
+        vfill = nan_as_num
+    x = kws.get('x', np.arange(df.x.max() + 1))
+    y = kws.get('y', np.arange(df.y.max() + 1))
     xx, yy = np.meshgrid(x, y)
     zz = np.empty(xx.shape)
-    zz.fill(np.nan)
+    zz.fill(vfill)
     def _f(irow):
         zz[int(irow.y)][int(irow.x)] = irow.v
     df.apply(_f, axis=1)
