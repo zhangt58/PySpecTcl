@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import toml
+import matplotlib.pyplot as plt
 import numpy as np
 import pathlib
 from requests.adapters import HTTPAdapter
@@ -121,9 +122,9 @@ class Spectrum(object):
         else:
             r = self._data
         if with_label:
-            return r.rename(columns=dict(zip(('x', 'y'), self.parameters)))
-        else:
-            return r
+            r.rename(columns=dict(zip(('x', 'y'), self.parameters)), inplace=True)
+            r.rename(columns={'v': 'count'}, inplace=True)
+        return r
 
     @property
     def parameters(self):
@@ -215,6 +216,32 @@ class Spectrum(object):
             low, high, bins = ax['low'], ax['high'], ax['bins']
             self._axes_values_world.append(low + v * (high - low) / bins)
             self._axes_map_fn.append(lambda ch: low + ch * (high - low) / bins)
+
+    def plot(self, ax=None, **kws):
+        """Plot spectrum data.
+        """
+        if ax is None:
+            _, ax = plt.subplots()
+        figsize = kws.pop('figsize', (10, 8))
+        if self.stype == '2D':
+            xcol, ycol = self.parameters
+            r = self.get_data().plot(kind='scatter', x=xcol, y=ycol,
+                                     c='count', s=kws.pop('s', 4), cmap=kws.pop('cmap', 'jet'),
+                                     ax=ax, figsize=figsize, **kws)
+            ax.set_xlabel(xcol)
+            ax.set_ylabel(ycol)
+            ax.set_title(self.name)
+            return r
+        elif self.stype == '1D':
+            xcol, = self.parameters
+            r = self.get_data().plot(kind='line', x=xcol, y='count', ax=ax, figsize=figsize, **kws)
+            ax.set_xlabel(xcol)
+            ax.set_ylabel('Count')
+            ax.set_title(self.name)
+            ax.lines[0].set_drawstyle(kws.get('ds', 'steps'))
+            return r
+        else:
+            return None
 
 
 ACTION_PARAMS = toml.load(CDIR_PATH.joinpath("action.toml"))
