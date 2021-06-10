@@ -58,6 +58,7 @@ class Spectrum(object):
     def __init__(self, name, conf, data, **kws):
         self._axes_values_channel = [] # list of arrays for all axes in channel coordinate
         self._axes_values_world = []   # list of arrays for all axes in world coordinate
+        self._axes_map_fn = []         # list of func to map channel to world
         self.name = name # == conf.index.values[0]
         self.data = data
         self.parameters = conf.Parameters
@@ -80,7 +81,7 @@ class Spectrum(object):
 
     @property
     def data(self):
-        """DataFrame : Table of the spectral contents.
+        """DataFrame : Table of the spectral contents (channel coordinate).
         """
         return self._data
 
@@ -101,6 +102,28 @@ class Spectrum(object):
             return self._axes_values_world
         else:
             return self._axes_values_channel
+
+    def get_data(self, map=True, with_label=True):
+        """Return the table of spectral data.
+
+        Parameters
+        ----------
+        map : bool
+            If do coordinate mapping from channel to world, by default is True.
+        with_label : bool
+            If set, return the table with expected column names, by default is True.
+        """
+        if map:
+            _d = self._data.copy()
+            for ax_name, fn in zip(('x', 'y'), self._axes_map_fn):
+                _d[ax_name] = _d[ax_name].apply(fn)
+            r = _d
+        else:
+            r = self._data
+        if with_label:
+            return r.rename(columns=dict(zip(('x', 'y'), self.parameters)))
+        else:
+            return r
 
     @property
     def parameters(self):
@@ -187,10 +210,11 @@ class Spectrum(object):
         if kws.get('force', False):
             return self._axes_values_world
         self._axes_values_world = []
+        self._axes_map_fn = []
         for ax, v in zip(self.axes, self._axes_values_channel):
             low, high, bins = ax['low'], ax['high'], ax['bins']
             self._axes_values_world.append(low + v * (high - low) / bins)
-
+            self._axes_map_fn.append(lambda ch: low + ch * (high - low) / bins)
 
 
 ACTION_PARAMS = toml.load(CDIR_PATH.joinpath("action.toml"))
