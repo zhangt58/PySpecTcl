@@ -223,21 +223,23 @@ class Spectrum(object):
         if ax is None:
             _, ax = plt.subplots()
         figsize = kws.pop('figsize', (10, 8))
+        fontsize = kws.pop('fontsize', 12)
         if self.stype == '2D':
             xcol, ycol = self.parameters
             r = self.get_data().plot(kind='scatter', x=xcol, y=ycol,
                                      c='count', s=kws.pop('s', 4), cmap=kws.pop('cmap', 'jet'),
                                      ax=ax, figsize=figsize, **kws)
-            ax.set_xlabel(xcol)
-            ax.set_ylabel(ycol)
-            ax.set_title(self.name)
+            ax.set_xlabel(xcol, fontsize=fontsize)
+            ax.set_ylabel(ycol, fontsize=fontsize)
+            ax.set_title(self.name, fontsize=fontsize + 2)
             return r
         elif self.stype == '1D':
             xcol, = self.parameters
-            r = self.get_data().plot(kind='line', x=xcol, y='count', ax=ax, figsize=figsize, **kws)
-            ax.set_xlabel(xcol)
-            ax.set_ylabel('Count')
-            ax.set_title(self.name)
+            r = self.get_data().plot(kind='line', x=xcol, y='count', ax=ax, figsize=figsize,
+                                     legend=kws.pop('legend', False), **kws)
+            ax.set_xlabel(xcol, fontsize=fontsize)
+            ax.set_ylabel('Count', fontsize=fontsize)
+            ax.set_title(self.name, fontsize=fontsize + 2)
             ax.lines[0].set_drawstyle(kws.get('ds', 'steps'))
             return r
         else:
