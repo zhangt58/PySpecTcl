@@ -7,8 +7,15 @@
 Tong Zhang <zhangt@frib.msu.edu>
 """
 
+from getpass import getuser
 from pandas import DataFrame
 import numpy as np
+import pathlib
+import json
+
+CDIR_PATH = pathlib.Path(__file__).parent
+with open(CDIR_PATH.joinpath("template.json"), "r") as fp:
+    TEMP_AS_JSON_DATA = json.load(fp)
 
 
 def to_image_tuple(df: DataFrame, nan_as_num: float=None, **kws) -> tuple:
@@ -50,3 +57,43 @@ def to_image_tuple(df: DataFrame, nan_as_num: float=None, **kws) -> tuple:
     df.apply(_f, axis=1)
     return xx, yy, zz
 
+
+def export_spectrum_for_allison(filepath, spectrum, energy : float=1.022487) -> None:
+    """Generate a json data file from 2D spectrum of transverse phase space for Allison scanner
+    app to calculate the emittance and Twiss parameter.
+
+    Parameters
+    ----------
+    filepath : str
+        File path for the output json data file.
+    spectrum : Spectrum
+        Spectrum object retrieved by DataClient.get_spectrum().
+    energy : float
+        Particle energy in keV.
+    """
+    xx, yy, zz = spectrum.to_image_tuple(nan_as_num=0)
+    ek = energy
+    ek0 = 1022.487 # [eV], where 1 mrad -> 1V
+    # xx in mm
+    xstep = (xx[0,:][-1] - xx[0,:][0]) / (len(xx[0,:]) - 1)
+    # yy in mrad --> in volt (1 mrad --> 1 V)
+    vv = yy * (ek * 1000.0 / ek0)
+    vstep = (vv[:,0][-1] - vv[:,0][0]) / (len(vv[:, 0]) - 1)
+    # update data
+    data = TEMP_AS_JSON_DATA.copy()
+    data['position'] = {'end': xx.max(), 'begin': xx.min(), 'step': xstep}
+    data['voltage'] = {'end': vv.max(), 'begin': vv.min(), 'step': vstep}
+    data['data']['shape'] = zz.shape
+    data['data']['array'] = zz.tolist()
+    data['Beam Source'] = {'Ek': ek * 1000, 'Ion Name': 'Ar', 'A': 40, 'Q': 9}
+    path = pathlib.Path(filepath)
+    data['info']['user'] = getuser()
+    data['note'] = f"Generated phase space data from {spectrum.name} spectrum, the voltage array is created from xp with the spec of FRIB allison scanner device, only for interfacing purpose."
+    try:
+        fullpath = path.expanduser().resolve()
+        with open(fullpath, 'w') as fp:
+            json.dump(data, fp, indent=2)
+    except:
+        print("Failed to export.")
+    else:
+        print(f"Exported spectrum to {fullpath}.")
