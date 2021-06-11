@@ -1,4 +1,5 @@
 from spectcl.client import *
+from spectcl.data import Spectrum
 
 __version__ = '0.1.0'
 __author__ = 'Tong Zhang <zhangt@frib.msu.edu>'
