@@ -12,6 +12,12 @@ Welcome to PySpecTcl's documentation!
 
    getting-started
 
+.. toctree::
+   :maxdepth: 1
+   :caption: API References
+
+   apiref
+
 
 Indices and tables
 ==================
