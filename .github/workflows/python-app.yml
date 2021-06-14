@@ -35,7 +35,7 @@ jobs:
 #        pytest -vs
     - name: Build documentation
       run: |
-        pip install sphinx pydata_sphinx_theme
+        pip install sphinx sphinx_rtd_theme
         cd doc
         make html
         cp -arv getting-started build/html

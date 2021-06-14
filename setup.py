@@ -8,7 +8,7 @@ install_requires = [
 
 extra_require = {
     'test': ['pytest'],
-    'doc': ['sphinx', 'pydata_sphinx_theme'],
+    'doc': ['sphinx', 'sphinx_rtd_theme'],
 }
 
 def set_entry_points():
