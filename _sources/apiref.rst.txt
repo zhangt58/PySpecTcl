@@ -7,4 +7,6 @@ API References
 .. toctree::
     :maxdepth: 1
 
-    apidocs/modules
+    PySpecTcl Client <apidocs/client>
+    PySpecTcl Spectrum <apidocs/spectrum>
+    PySpecTcl Utilities <apidocs/util>
