@@ -190,6 +190,10 @@ class Spectrum(object):
             A tuple of ndarray for MatplotlibImageWidget, ``(xx, yy, zz)``,
             with the same shape, ``zz`` could be used to update the image,
             ``xx`` and ``yy`` are 2D array for extent, or None.
+
+        See Also
+        --------
+        :func:`~spectcl.to_image_tuple`
         """
         if self.stype != '2D':
             print(f"Spectrum {self.name} is not 2D type.")

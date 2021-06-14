@@ -1,4 +1,5 @@
 from spectcl.client import *
+from spectcl.contrib import *
 from spectcl.data import Spectrum
 
 __version__ = '0.2.0'
