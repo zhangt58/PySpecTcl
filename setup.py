@@ -24,7 +24,7 @@ def set_entry_points():
 
 setup(
     name='pyspectcl',
-    version='0.2.0',
+    version='0.2.1',
     description='Python interface to SpecTcl server',
     author='Tong Zhang',
     author_email='zhangt@frib.msu.edu',
