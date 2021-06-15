@@ -6,6 +6,12 @@
 Welcome to PySpecTcl's documentation!
 =====================================
 
+``PySpecTcl`` is a Python client package for SpecTcl REST server.
+``PySpecTcl`` features Pythonic APIs for the communication between Python
+client and SpecTcl data server, and also convenient functions for data
+pre-processing to interface other developed HLA at FRIB. This package also
+comes with a data visualization app.
+
 .. toctree::
    :maxdepth: 2
    :caption: Getting Started
