@@ -10,6 +10,7 @@ from .utils import Spectrum
 from .utils import GATE_NAME_MAP
 from .utils import GATE_TYPE_MAP
 from .utils import SPEC_NAME_MAP
+from .utils import GATE_APPLY_MAP
 
 DEFAULT_APP_NAME = 'spectcl'
 DEFAULT_BASE_URL = 'http://127.0.0.1'
@@ -78,13 +79,15 @@ class SpecTclDataClient(object):
         """
         self._base_uri = f"{self.base_url}:{self.port}/{self.name}/{self.group}"
 
-    def get(self, action, **action_params):
+    def get(self, action, raw=False, **action_params):
         """Retrieve data from SpecTcl service, return as a dict.
 
         Parameters
         ----------
         action : str
             Action name.
+        raw : bool
+            if set returns raw response.
 
         Keyword Argumetns
         -----------------
@@ -101,7 +104,10 @@ class SpecTclDataClient(object):
             return
         url = self._base_uri + '/' + action
         r = requests.get(url, params=action_params, verify=False)
-        return make_response(r)
+        if raw:
+            return r
+        else:
+            return make_response(r)
 
     def list(self, **kws):
         """List defined spectra.
@@ -247,6 +253,60 @@ class SpecTclGateClient(SpecTclDataClient):
         if kws.get('update_cache', False):
             self._vlist_cache = df
         return df
+
+
+class SpecTclApplyClient(SpecTclDataClient):
+    """Client for apply service group. (gate application)
+    """
+    def __init__(self, base_url=DEFAULT_BASE_URL, port=DEFAULT_PORT_NUMBER,
+                 name=DEFAULT_APP_NAME):
+        super(self.__class__, self).__init__(base_url, port, name, "apply")
+
+    def list(self, only_gated=True, **kws):
+        """List gate applying status to a spectrum
+
+        Parameters
+        ----------
+        only_gated : bool
+            If set, only show gated spectra.
+
+        Keyword Arguments
+        -----------------
+        pattern : str
+            Unix wildcard pattern as the name filter.
+        update_cache : bool
+            If set, update the cached value for gate applications.
+
+        Returns
+        -------
+        r : DataFrame
+            Table of gate configurations.
+        """
+        r = self.get("list", **kws)
+        df = pd.DataFrame.from_records(r)
+        df['desc'] = df['gate'].apply(lambda i: GATE_APPLY_MAP.get(i, i))
+        #df.rename(columns=GATE_NAME_MAP, inplace=True)
+        df.set_index('spectrum', inplace=True)
+        if kws.get('update_cache', False):
+            self._vlist_cache = df
+        if only_gated:
+            return df.loc[df['gate'] != '-TRUE-']
+        else:
+            return df
+
+    def apply(self, spectrum, gate, **kws):
+        """Apply *spectrum* with *gate*.
+
+        Returns
+        r : bool
+            True if applied, otherwise False.
+        """
+        r = self.get("apply", raw=True, spectrum=spectrum, gate=gate, **kws)
+        if r.json()['status'] == 'OK':
+            print(f"Applied {gate} to {spectrum}")
+            return True
+        print(f"Failed to apply {gate} to {spectrum}")
+        return False
 
 
 if __name__ == '__main__':

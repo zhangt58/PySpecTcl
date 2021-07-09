@@ -286,3 +286,7 @@ GATE_TYPE_MAP = {
     'T': 'True',
     'F': 'False'
 }
+
+GATE_APPLY_MAP = {
+    '-TRUE-': 'ungated'  # ungated
+}

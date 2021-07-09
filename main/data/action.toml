@@ -34,3 +34,11 @@
     column = ["name", "type"]
     [gate.delete]
     [gate.edit]
+
+[apply] # gate application
+    [apply.list]
+    arg = ["pattern"]
+    column = ["spectrum", "gate"]
+    [apply.apply]
+    arg = ["spectrum", "gate"]
+    column = [""]
