@@ -180,14 +180,19 @@ class SpecTclDataClient(object):
         refresh_cache : bool
             If set, refresh the cache of spectra info.
 
+        gate_client:
+        apply_client:
+
         Returns:
         r : Spectrum
             Spectrum instance.
         """
         kws.pop('as_raw', None)
+        gate_client = kws.pop('gate_client', None)
+        apply_client = kws.pop('apply_client', None)
         data = self.contents(name, as_raw=True, **kws)
         conf = self._vlist_cache.loc[name]
-        return Spectrum(name, conf, data)
+        return Spectrum(name, conf, data, gate_client=gate_client, apply_client=apply_client, **kws)
 
     def parameters(self, name):
         """Convenient method to return the parameters of a spectrum defined
