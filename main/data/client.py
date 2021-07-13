@@ -20,8 +20,8 @@ DEFAULT_GROUP_NAME = 'spectrum'
 JSON_HEADERS = {"Content-Type": "application/json"}
 
 
-class SpecTclDataClient(object):
-    """Client for data retrieval.
+class _BaseClient(object):
+    """BaseClient
 
     Parameters
     ----------
@@ -108,6 +108,26 @@ class SpecTclDataClient(object):
             return r
         else:
             return make_response(r)
+
+    def validate_action(self, action, action_params):
+        params = ACTION_PARAMS[self._group][action]
+        for i in action_params:
+            if i not in params['arg']:
+                print('-- {} is not a valid action parameter.'.format(i))
+                print("-- Valid action Parameters of {}: {}".format(self._group, ','.join(params)))
+                return False
+        return True
+
+    def __repr__(self):
+        return f"[Data Client] SpecTcl REST Service on: {self._base_uri}"
+
+
+class SpecTclDataClient(_BaseClient):
+    """Client for spectral data retrieval.
+    """
+    def __init__(self, base_url=DEFAULT_BASE_URL, port=DEFAULT_PORT_NUMBER,
+                 name=DEFAULT_APP_NAME):
+        super(self.__class__, self).__init__(base_url, port, name, "spectrum")
 
     def list(self, **kws):
         """List defined spectra.
@@ -215,20 +235,8 @@ class SpecTclDataClient(object):
         else:
             return conf.Parameters
 
-    def validate_action(self, action, action_params):
-        params = ACTION_PARAMS[self._group][action]
-        for i in action_params:
-            if i not in params['arg']:
-                print('-- {} is not a valid action parameter.'.format(i))
-                print("-- Valid action Parameters of {}: {}".format(self._group, ','.join(params)))
-                return False
-        return True
 
-    def __repr__(self):
-        return f"[Data Client] SpecTcl REST Service on: {self._base_uri}"
-
-
-class SpecTclGateClient(SpecTclDataClient):
+class SpecTclGateClient(_BaseClient):
     """Client for gate service group.
     """
     def __init__(self, base_url=DEFAULT_BASE_URL, port=DEFAULT_PORT_NUMBER,
@@ -260,7 +268,7 @@ class SpecTclGateClient(SpecTclDataClient):
         return df
 
 
-class SpecTclApplyClient(SpecTclDataClient):
+class SpecTclApplyClient(_BaseClient):
     """Client for apply service group. (gate application)
     """
     def __init__(self, base_url=DEFAULT_BASE_URL, port=DEFAULT_PORT_NUMBER,
@@ -312,6 +320,24 @@ class SpecTclApplyClient(SpecTclDataClient):
             return True
         print(f"Failed to apply {gate} to {spectrum}")
         return False
+
+
+class SpecTclClient(object):
+    """Data interface for data of spectrum, gate, apply info.
+    """
+    def __init__(self, base_url=DEFAULT_BASE_URL,
+                 port=DEFAULT_PORT_NUMBER, name=DEFAULT_APP_NAME):
+        self.name = name
+        self.base_url = base_url
+        self.port = port
+        #
+        self._data_client = SpecTclDataClient(base_url, port, name)
+        self._gate_client = SpecTclGateClient(base_url, port, name)
+        self._apply_client = SpecTclApplyClient(base_url, port, name)
+
+    def __repr__(self):
+        return f"[SpecTcl Client] to {self.base_url}:{self.port}/{self.name}"
+
 
 
 if __name__ == '__main__':
