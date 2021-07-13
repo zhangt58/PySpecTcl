@@ -55,10 +55,8 @@ class Spectrum(object):
     -----------------
     map : bool
         If do coordinate mapping from channel to world, by default is True.
-    gate_client : GateClient
-        SpecTcl GateClient instance.
-    apply_client : GateApplyClient
-        SpecTcl GateApplyClient instance.
+    client : SpecTclClient
+        SpecTclClient instance.
     """
     def __init__(self, name, conf, data, **kws):
         self._axes_values_channel = [] # list of arrays for all axes in channel coordinate
@@ -73,10 +71,8 @@ class Spectrum(object):
         # map axes?
         if kws.get('map', True):
             self.map_data()
-
-        #
-        self.gate_client = kws.get('gate_client', None)
-        self.apply_client = kws.get('apply_client', None)
+        # client
+        self.client = kws.get('client', None)
 
     @property
     def name(self):
@@ -229,17 +225,28 @@ class Spectrum(object):
             self._axes_values_world.append(low + v * (high - low) / bins)
             self._axes_map_fn.append(lambda ch: low + ch * (high - low) / bins)
 
+    def del_gate(self):
+        pass
+
+    def set_gate(self, gate: str):
+        """Set/update with *gate*.
+        """
+        if self.client is None:
+            print(f"Cannot apply '{gate}'")
+            return None
+        self.client._apply_client.apply(self.name, gate)
+
     def get_gate(self):
         """Return applied gate.
         """
-        if self.apply_client is None:
+        if self.client is None:
             return None
-        applied_gate = self.apply_client.list().loc[self._name].gate
+        applied_gate = self.client._apply_client.list().loc[self._name].gate
         if applied_gate == '-TRUE-':
             return None
-        if self.gate_client is None:
-            return applied_gate
-        return self.gate_client.list().loc[applied_gate]
+        return self.client._gate_client.list().loc[applied_gate]
+
+    gate = property(get_gate, set_gate, del_gate, "Gate")
 
     def plot(self, ax=None, **kws):
         """Plot spectrum data.

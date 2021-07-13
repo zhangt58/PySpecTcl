@@ -17,6 +17,8 @@ DEFAULT_BASE_URL = 'http://127.0.0.1'
 DEFAULT_PORT_NUMBER = 8000
 DEFAULT_GROUP_NAME = 'spectrum'
 
+VALID_GROUP_LIST = ['spectrum', 'gate', 'apply']
+
 JSON_HEADERS = {"Content-Type": "application/json"}
 
 
@@ -99,7 +101,8 @@ class _BaseClient(object):
         r : dict
             Pack retrieval as dict.
         """
-        is_valid = self.validate_action(action, action_params)
+        p = {k: v for k, v in action_params.items() if k not in ('refresh_cache', )}
+        is_valid = self.validate_action(action, p)
         if not is_valid:
             return
         url = self._base_uri + '/' + action
@@ -136,7 +139,7 @@ class SpecTclDataClient(_BaseClient):
         -----------------
         filter : str
             Unix wildcard pattern as the name filter.
-        update_cache : bool
+        refresh_cache : bool
             If set, update the cached value for spectrum configurations.
 
         Returns
@@ -148,7 +151,7 @@ class SpecTclDataClient(_BaseClient):
         df = pd.DataFrame.from_records(r)
         df.rename(columns=SPEC_NAME_MAP, inplace=True)
         df.set_index('Name', inplace=True)
-        if kws.get('update_cache', False):
+        if kws.get('refresh_cache', False):
             self._vlist_cache = df
         return df
 
@@ -176,8 +179,7 @@ class SpecTclDataClient(_BaseClient):
             return None
         else:
             df = pd.DataFrame.from_dict(data['channels'])
-            if refresh_cache:
-                self.list()
+            self.list(refresh_cache=refresh_cache)
             spec_conf = self._vlist_cache.loc[name]
             if not as_raw:
                 params = spec_conf.Parameters
@@ -186,33 +188,6 @@ class SpecTclDataClient(_BaseClient):
                 elif len(params) == 2: # type '2'
                     df.rename(columns={'x': params[0], 'y': params[1], 'v': 'count'}, inplace=True)
             return df
-
-    def get_spectrum(self, name, **kws):
-        """Return a instance of Spectrum for spectrum of the name defined by *name*.
-
-        Parameters
-        ----------
-        name : str
-            Name of the spectrum.
-
-        Keyword Arguments
-        -----------------
-        refresh_cache : bool
-            If set, refresh the cache of spectra info.
-
-        gate_client:
-        apply_client:
-
-        Returns:
-        r : Spectrum
-            Spectrum instance.
-        """
-        kws.pop('as_raw', None)
-        gate_client = kws.pop('gate_client', None)
-        apply_client = kws.pop('apply_client', None)
-        data = self.contents(name, as_raw=True, **kws)
-        conf = self._vlist_cache.loc[name]
-        return Spectrum(name, conf, data, gate_client=gate_client, apply_client=apply_client, **kws)
 
     def parameters(self, name):
         """Convenient method to return the parameters of a spectrum defined
@@ -250,7 +225,7 @@ class SpecTclGateClient(_BaseClient):
         -----------------
         pattern : str
             Unix wildcard pattern as the name filter.
-        update_cache : bool
+        refresh_cache : bool
             If set, update the cached value for gate configurations.
 
         Returns
@@ -263,7 +238,7 @@ class SpecTclGateClient(_BaseClient):
         df['Desc'] = df['type'].apply(lambda i: GATE_TYPE_MAP[i])
         df.rename(columns=GATE_NAME_MAP, inplace=True)
         df.set_index('Name', inplace=True)
-        if kws.get('update_cache', False):
+        if kws.get('refresh_cache', False):
             self._vlist_cache = df
         return df
 
@@ -275,7 +250,7 @@ class SpecTclApplyClient(_BaseClient):
                  name=DEFAULT_APP_NAME):
         super(self.__class__, self).__init__(base_url, port, name, "apply")
 
-    def list(self, only_gated=True, **kws):
+    def list(self, only_gated=False, **kws):
         """List gate applying status to a spectrum
 
         Parameters
@@ -287,7 +262,7 @@ class SpecTclApplyClient(_BaseClient):
         -----------------
         pattern : str
             Unix wildcard pattern as the name filter.
-        update_cache : bool
+        refresh_cache : bool
             If set, update the cached value for gate applications.
 
         Returns
@@ -300,7 +275,7 @@ class SpecTclApplyClient(_BaseClient):
         df['desc'] = df['gate'].apply(lambda i: GATE_APPLY_MAP.get(i, i))
         #df.rename(columns=GATE_NAME_MAP, inplace=True)
         df.set_index('spectrum', inplace=True)
-        if kws.get('update_cache', False):
+        if kws.get('refresh_cache', False):
             self._vlist_cache = df
         if only_gated:
             return df.loc[df['gate'] != '-TRUE-']
@@ -334,10 +309,55 @@ class SpecTclClient(object):
         self._data_client = SpecTclDataClient(base_url, port, name)
         self._gate_client = SpecTclGateClient(base_url, port, name)
         self._apply_client = SpecTclApplyClient(base_url, port, name)
+        #
+        self.__list_map = {
+                'spectrum': self._data_client,
+                'gate': self._gate_client,
+                'apply': self._apply_client
+        }
 
     def __repr__(self):
         return f"[SpecTcl Client] to {self.base_url}:{self.port}/{self.name}"
 
+    def list(self, group, **kws):
+        if group not in VALID_GROUP_LIST:
+            print(f"'{group}' is not one of the supported: {VALID_GROUP_LIST}.")
+            return None
+        else:
+            r = self.__list_map.get(group).list(**kws)
+            if group == 'spectrum':
+                # append gated column
+                gate_apply_data = self._apply_client.list()
+                r['Gate'] = r.apply(lambda i: gate_apply_data.loc[i.name].desc, axis=1)
+            return r
+
+    def get_spectrum(self, name, **kws):
+        """Return a instance of Spectrum for spectrum of the name defined by *name*.
+
+        Parameters
+        ----------
+        name : str
+            Name of the spectrum.
+
+        Keyword Arguments
+        -----------------
+        refresh_cache : bool
+            If set, refresh the cache of spectra info.
+
+        Returns
+        -------
+        r : Spectrum
+            Spectrum instance.
+        """
+        kws.pop('as_raw', None)
+
+        refresh_cache = kws.pop('refresh_cache', False)
+        for c in (self._data_client, self._gate_client, self._apply_client):
+            c.list(refresh_cache=refresh_cache)
+        _spectrum_data = self._data_client._vlist_cache
+        data = self._data_client.contents(name, as_raw=True, **kws)
+        conf = _spectrum_data.loc[name]
+        return Spectrum(name, conf, data, client=self)
 
 
 if __name__ == '__main__':
