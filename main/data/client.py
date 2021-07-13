@@ -299,6 +299,15 @@ class SpecTclApplyClient(_BaseClient):
 
 class SpecTclClient(object):
     """Data interface for data of spectrum, gate, apply info.
+
+    Examples
+    --------
+    >>> from spectcl.client import Client
+    >>> client = Client()
+    >>> client.list("spectrum")
+    >>> sp = client.get_spectrum("pid::fp.pin.dE_vs_tof.rf2!FPslits")
+    >>> sp.gate
+    >>> sp.gate = <gate name>
     """
     def __init__(self, base_url=DEFAULT_BASE_URL,
                  port=DEFAULT_PORT_NUMBER, name=DEFAULT_APP_NAME):
