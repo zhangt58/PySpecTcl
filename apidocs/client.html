@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Clients &mdash; PySpecTcl 0.2.1 documentation</title>
+  <title>Clients &mdash; PySpecTcl 0.3.0 documentation</title>
   
 
   
@@ -87,11 +87,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Resources</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API References</span></p>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../apiref.html">API References</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">PySpecTcl Client</a></li>
@@ -184,22 +184,9 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="spectcl.data.client.SpecTclDataClient">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spectcl.data.client.</span></span><span class="sig-name descname"><span class="pre">SpecTclDataClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'http://127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spectcl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spectrum'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/client.html#SpecTclDataClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.data.client.SpecTclDataClient" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Client for data retrieval.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>base_url</strong> (<em>str</em>) – Base url for data retrieval API, default is ‘<a class="reference external" href="http://127.0.0.1">http://127.0.0.1</a>’.</p></li>
-<li><p><strong>port</strong> (<em>int</em>) – Port number for service, default is 8000.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="spectcl.data.client.SpecTclDataClient.base_url">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">base_url</span></span><a class="headerlink" href="#spectcl.data.client.SpecTclDataClient.base_url" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spectcl.data.client.</span></span><span class="sig-name descname"><span class="pre">SpecTclDataClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'http://127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spectcl'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/client.html#SpecTclDataClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.data.client.SpecTclDataClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">spectcl.data.client._BaseClient</span></code></p>
+<p>Client for spectral data retrieval.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.data.client.SpecTclDataClient.contents">
 <span class="sig-name descname"><span class="pre">contents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/client.html#SpecTclDataClient.contents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.data.client.SpecTclDataClient.contents" title="Permalink to this definition">¶</a></dt>
@@ -212,56 +199,11 @@
 <dd class="field-even"><ul class="simple">
 <li><p><strong>as_raw</strong> (<em>bool</em>) – If set, return data with original column names.</p></li>
 <li><p><strong>refresh_cache</strong> (<em>bool</em>) – If set, refresh the cache of spectra info.</p></li>
-<li><p><strong>arguments that client.get</strong><strong>(</strong><strong>'contents'</strong><strong>) </strong><strong>supports.</strong> (<em>Other</em>) – </p></li>
+<li><p><strong>supports.</strong> (<em>Other arguments that client.get</em><em>(</em><em>'contents'</em><em>)</em>) – </p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spectcl.data.client.SpecTclDataClient.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">action_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/client.html#SpecTclDataClient.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.data.client.SpecTclDataClient.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Retrieve data from SpecTcl service, return as a dict.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>action</strong> (<em>str</em>) – Action name.</p></li>
-<li><p><strong>Argumetns</strong> (<em>Keyword</em>) – </p></li>
-<li><p><strong>-----------------</strong> – </p></li>
-<li><p><strong>action_params</strong> (<em>str</em>) – Supported action parameter configs.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>r</strong> – Pack retrieval as dict.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spectcl.data.client.SpecTclDataClient.get_spectrum">
-<span class="sig-name descname"><span class="pre">get_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/client.html#SpecTclDataClient.get_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.data.client.SpecTclDataClient.get_spectrum" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a instance of Spectrum for spectrum of the name defined by <em>name</em>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Name of the spectrum.</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>refresh_cache</strong> (<em>bool</em>) – If set, refresh the cache of spectra info.</p></li>
-<li><p><strong>Returns</strong> – </p></li>
-<li><p><strong>r</strong> (<a class="reference internal" href="spectrum.html#spectcl.Spectrum" title="spectcl.Spectrum"><em>Spectrum</em></a>) – Spectrum instance.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="spectcl.data.client.SpecTclDataClient.group">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">group</span></span><a class="headerlink" href="#spectcl.data.client.SpecTclDataClient.group" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.data.client.SpecTclDataClient.list">
@@ -271,7 +213,7 @@
 <dt class="field-odd">Keyword Arguments</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filter</strong> (<em>str</em>) – Unix wildcard pattern as the name filter.</p></li>
-<li><p><strong>update_cache</strong> (<em>bool</em>) – If set, update the cached value for spectrum configurations.</p></li>
+<li><p><strong>refresh_cache</strong> (<em>bool</em>) – If set, update the cached value for spectrum configurations.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -282,11 +224,6 @@
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="spectcl.data.client.SpecTclDataClient.name">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#spectcl.data.client.SpecTclDataClient.name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.data.client.SpecTclDataClient.parameters">
@@ -306,28 +243,12 @@ by <em>name</em>.</p>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="spectcl.data.client.SpecTclDataClient.port">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">port</span></span><a class="headerlink" href="#spectcl.data.client.SpecTclDataClient.port" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spectcl.data.client.SpecTclDataClient.update_base_uri">
-<span class="sig-name descname"><span class="pre">update_base_uri</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/client.html#SpecTclDataClient.update_base_uri"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.data.client.SpecTclDataClient.update_base_uri" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update base uri.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spectcl.data.client.SpecTclDataClient.validate_action">
-<span class="sig-name descname"><span class="pre">validate_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/client.html#SpecTclDataClient.validate_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.data.client.SpecTclDataClient.validate_action" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="spectcl.data.client.SpecTclGateClient">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">spectcl.data.client.</span></span><span class="sig-name descname"><span class="pre">SpecTclGateClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'http://127.0.0.1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spectcl'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/client.html#SpecTclGateClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.data.client.SpecTclGateClient" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#spectcl.data.client.SpecTclDataClient" title="spectcl.data.client.SpecTclDataClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">spectcl.data.client.SpecTclDataClient</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">spectcl.data.client._BaseClient</span></code></p>
 <p>Client for gate service group.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.data.client.SpecTclGateClient.list">
@@ -337,7 +258,7 @@ by <em>name</em>.</p>
 <dt class="field-odd">Keyword Arguments</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>pattern</strong> (<em>str</em>) – Unix wildcard pattern as the name filter.</p></li>
-<li><p><strong>update_cache</strong> (<em>bool</em>) – If set, update the cached value for gate configurations.</p></li>
+<li><p><strong>refresh_cache</strong> (<em>bool</em>) – If set, update the cached value for gate configurations.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

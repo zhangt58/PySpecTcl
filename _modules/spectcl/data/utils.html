@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>spectcl.data.utils &mdash; PySpecTcl 0.2.1 documentation</title>
+  <title>spectcl.data.utils &mdash; PySpecTcl 0.3.0 documentation</title>
   
 
   
@@ -85,11 +85,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Resources</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API References</span></p>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../apiref.html">API References</a></li>
 </ul>
@@ -215,6 +215,8 @@
 <span class="sd">    -----------------</span>
 <span class="sd">    map : bool</span>
 <span class="sd">        If do coordinate mapping from channel to world, by default is True.</span>
+<span class="sd">    client : SpecTclClient</span>
+<span class="sd">        SpecTclClient instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_channel</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># list of arrays for all axes in channel coordinate</span>
@@ -229,6 +231,8 @@
         <span class="c1"># map axes?</span>
         <span class="k">if</span> <span class="n">kws</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;map&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">map_data</span><span class="p">()</span>
+        <span class="c1"># client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;client&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -381,6 +385,29 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_world</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">low</span> <span class="o">+</span> <span class="n">v</span> <span class="o">*</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="n">bins</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_axes_map_fn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">lambda</span> <span class="n">ch</span><span class="p">:</span> <span class="n">low</span> <span class="o">+</span> <span class="n">ch</span> <span class="o">*</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="n">bins</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="Spectrum.del_gate"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.del_gate">[docs]</a>    <span class="k">def</span> <span class="nf">del_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Spectrum.set_gate"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.set_gate">[docs]</a>    <span class="k">def</span> <span class="nf">set_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gate</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set/update with *gate*.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot apply &#39;</span><span class="si">{</span><span class="n">gate</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_apply_client</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">gate</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spectrum.get_gate"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.get_gate">[docs]</a>    <span class="k">def</span> <span class="nf">get_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return applied gate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">applied_gate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_apply_client</span><span class="o">.</span><span class="n">list</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">]</span><span class="o">.</span><span class="n">gate</span>
+        <span class="k">if</span> <span class="n">applied_gate</span> <span class="o">==</span> <span class="s1">&#39;-TRUE-&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_gate_client</span><span class="o">.</span><span class="n">list</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">applied_gate</span><span class="p">]</span></div>
+
+    <span class="n">gate</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_gate</span><span class="p">,</span> <span class="n">set_gate</span><span class="p">,</span> <span class="n">del_gate</span><span class="p">,</span> <span class="s2">&quot;Gate&quot;</span><span class="p">)</span>
+
 <div class="viewcode-block" id="Spectrum.plot"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Plot spectrum data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -445,6 +472,10 @@
     <span class="s1">&#39;nm&#39;</span><span class="p">:</span> <span class="s1">&#39;Andnot Mask&#39;</span><span class="p">,</span>
     <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;True&#39;</span><span class="p">,</span>
     <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="s1">&#39;False&#39;</span>
+<span class="p">}</span>
+
+<span class="n">GATE_APPLY_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;-TRUE-&#39;</span><span class="p">:</span> <span class="s1">&#39;ungated&#39;</span>  <span class="c1"># ungated</span>
 <span class="p">}</span>
 </pre></div>
 

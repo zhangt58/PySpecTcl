@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Utilities &mdash; PySpecTcl 0.2.1 documentation</title>
+  <title>Utilities &mdash; PySpecTcl 0.3.0 documentation</title>
   
 
   
@@ -86,11 +86,11 @@
               
             
             
-              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Resources</a></li>
 </ul>
-<p class="caption"><span class="caption-text">API References</span></p>
+<p class="caption" role="heading"><span class="caption-text">API References</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../apiref.html">API References</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="client.html">PySpecTcl Client</a></li>
@@ -171,7 +171,7 @@
 <h1>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="spectcl.to_image_tuple">
-<span class="sig-prename descclassname"><span class="pre">spectcl.</span></span><span class="sig-name descname"><span class="pre">to_image_tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan_as_num</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="../_modules/spectcl/contrib/data.html#to_image_tuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.to_image_tuple" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">spectcl.</span></span><span class="sig-name descname"><span class="pre">to_image_tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan_as_num</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="../_modules/spectcl/contrib/data.html#to_image_tuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.to_image_tuple" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process the spectrum data of x, y, v to three 2D array that
 could be visualized in <cite>mpl4qt.MatplotlibImageWidget</cite>.</p>
 <dl class="field-list simple">
@@ -200,7 +200,7 @@ with the same shape, <code class="docutils literal notranslate"><span class="pre
 
 <dl class="py function">
 <dt class="sig sig-object py" id="spectcl.export_spectrum_for_allison">
-<span class="sig-prename descclassname"><span class="pre">spectcl.</span></span><span class="sig-name descname"><span class="pre">export_spectrum_for_allison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.022487</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../_modules/spectcl/contrib/data.html#export_spectrum_for_allison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.export_spectrum_for_allison" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">spectcl.</span></span><span class="sig-name descname"><span class="pre">export_spectrum_for_allison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.022487</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/spectcl/contrib/data.html#export_spectrum_for_allison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.export_spectrum_for_allison" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a json data file from 2D spectrum of transverse phase space for Allison scanner
 app to calculate the emittance and Twiss parameter.</p>
 <dl class="field-list simple">
