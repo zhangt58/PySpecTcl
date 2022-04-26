@@ -234,6 +234,8 @@ class SpecTclGateClient(_BaseClient):
             Table of gate configurations.
         """
         r = self.get("list", **kws)
+        if r == []:
+            return None
         df = pd.DataFrame.from_records(r)
         df['Desc'] = df['type'].apply(lambda i: GATE_TYPE_MAP[i])
         df.rename(columns=GATE_NAME_MAP, inplace=True)
