@@ -26,8 +26,9 @@ import pandas as pd
 import numpy as np
 from numpy import ndarray
 import time
+import os
 
-from spectcl.client import DataClient
+from spectcl.client import Client
 
 from .ui.ui_app import Ui_MainWindow
 
@@ -61,9 +62,13 @@ class MyAppWindow(BaseAppForm, Ui_MainWindow):
         self._post_init()
 
     def _post_init(self):
-        self.client = DataClient()
-        self.server_url_lineEdit.setText(self.client._base_uri)
-        #self.server_url_lineEdit.returnPressed.emit()
+        self.client = Client(
+                base_url=os.environ.get('BASE_URL', 'http://127.0.0.1'),
+                port=os.environ.get('PORT', 8000)
+        )
+
+        self.server_url_lineEdit.setText(self.client._data_client._base_uri)
+        self.server_url_lineEdit.returnPressed.emit()
 
         self.daq_rate_lbl.setVisible(False)
         self.daq_freq_sbox.valueChanged.emit(self.daq_freq_sbox.value())
@@ -133,14 +138,13 @@ class MyAppWindow(BaseAppForm, Ui_MainWindow):
         """
         from urllib.parse import urlparse
         url = urlparse(self.server_url_lineEdit.text())
-        self.client._base_url = url.scheme + '://' + url.hostname
-        self.client._port = url.port
-        self.client.update_base_uri()
+        self.client.base_url = url.scheme + '://' + url.hostname
+        self.client.port = url.port
 
         #
-        self.spectra_dict = {i['name']: (i['type'], i['parameters']) for i in self.client.get('list')}
+        spectra_list = list(self.client.list('spectrum').index)
         self.spectrum_cbb.clear()
-        self.spectrum_cbb.addItems(self.spectra_dict.keys())
+        self.spectrum_cbb.addItems(spectra_list)
 
     @pyqtSlot(bool)
     def on_toggle_auto_update(self, enabled):
