@@ -314,8 +314,8 @@ class SpecTclClient(object):
     def __init__(self, base_url=DEFAULT_BASE_URL,
                  port=DEFAULT_PORT_NUMBER, name=DEFAULT_APP_NAME):
         self.name = name
-        self.base_url = base_url
-        self.port = port
+        self._base_url = base_url
+        self._port = port
         #
         self._data_client = SpecTclDataClient(base_url, port, name)
         self._gate_client = SpecTclGateClient(base_url, port, name)
@@ -326,6 +326,26 @@ class SpecTclClient(object):
                 'gate': self._gate_client,
                 'apply': self._apply_client
         }
+
+    @property
+    def port(self):
+        return self._port
+
+    @port.setter
+    def port(self, i):
+        self._port = i
+        for c in (self._data_client, self._gate_client, self._apply_client):
+            c.port = i
+
+    @property
+    def base_url(self):
+        return self._base_url
+
+    @base_url.setter
+    def base_url(self, s):
+        self._base_url = s
+        for c in (self._data_client, self._gate_client, self._apply_client):
+            c.base_url = s
 
     def __repr__(self):
         return f"[SpecTcl Client] to {self.base_url}:{self.port}/{self.name}"
