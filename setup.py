@@ -1,9 +1,11 @@
 from setuptools import setup
 
 install_requires = [
-    'pandas==1.1.4',
-    'requests==2.24.0',
-    'simplejson==3.16.0',
+    'pandas==1.4.3',
+    'requests==2.28.1',
+    'simplejson==3.17.6',
+    'matplotlib==3.5.3',
+    'toml==0.10.2'
 ]
 
 extra_require = {
@@ -24,8 +26,11 @@ def set_entry_points():
 
 setup(
     name='pyspectcl',
-    version='0.3.2',
+    version='0.3.2-1',
     description='Python interface to SpecTcl server',
+    long_description=readme(),
+    long_description_content_type='text/markdown',
+    url='https://github.com/archman/PySpecTcl',
     author='Tong Zhang',
     author_email='zhangt@frib.msu.edu',
     packages=[
@@ -49,6 +54,8 @@ setup(
     install_requires=install_requires,
     extra_require=extra_require,
     entry_points=set_entry_points(),
+    license='GPL3+',
+    keywords='SpecTcl REST',
     classifiers=[
         'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules',
