@@ -1,7 +1,7 @@
 from setuptools import setup
 
 install_requires = [
-    'pandas==1.4.3',
+    'pandas==1.3.5', # Python 3.7
     'requests==2.28.1',
     'simplejson==3.17.6',
     'matplotlib==3.5.3',
