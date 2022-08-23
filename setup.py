@@ -13,6 +13,12 @@ extra_require = {
     'doc': ['sphinx', 'sphinx_rtd_theme'],
 }
 
+
+def readme():
+    with open('README.md', 'r') as f:
+        return f.read()
+
+
 def set_entry_points():
     r = {}
 #    r['console_scripts'] = [
