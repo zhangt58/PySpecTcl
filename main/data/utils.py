@@ -4,6 +4,7 @@ import toml
 import matplotlib.pyplot as plt
 import numpy as np
 import pathlib
+from functools import partial
 from requests.adapters import HTTPAdapter
 from spectcl.contrib import to_image_tuple
 
@@ -223,7 +224,7 @@ class Spectrum(object):
         for ax, v in zip(self.axes, self._axes_values_channel):
             low, high, bins = ax['low'], ax['high'], ax['bins']
             self._axes_values_world.append(low + v * (high - low) / bins)
-            self._axes_map_fn.append(lambda ch: low + ch * (high - low) / bins)
+            self._axes_map_fn.append(partial(_map_fn, low, high, bins))
 
     def del_gate(self):
         pass
@@ -250,6 +251,31 @@ class Spectrum(object):
 
     def plot(self, ax=None, **kws):
         """Plot spectrum data.
+
+        Parameters
+        ----------
+        ax : Axes
+            Axes object, e.g., could be created by matplotlib.pyplot.subplots().
+
+        Keyword Arguments
+        -----------------
+        figsize : tuple
+            Tuple of figure width and height, default is (10, 8).
+        fontsize : int
+            Font size, default is 12.
+        s : float
+            Point size for 2D plot, default is 4.0.
+        cmap : str
+            Colormap name for 2D plot, default is 'jet'.
+        legend : bool
+            If show legend or not for 1D plot, default is False.
+        ds : str
+            Draw line style for 1D plot, default is 'steps'.
+        and other matplotlib.pyplot.plot() arguments.
+
+        Returns
+        -------
+        o : Axes
         """
         if ax is None:
             _, ax = plt.subplots()
@@ -275,6 +301,10 @@ class Spectrum(object):
             return r
         else:
             return None
+
+
+def _map_fn(low, high, bins, ch):
+    return low + ch * (high - low) / bins
 
 
 ACTION_PARAMS = toml.load(CDIR_PATH.joinpath("action.toml"))
