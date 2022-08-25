@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spectrum &mdash; PySpecTcl 0.3.2 documentation</title>
+  <title>Spectrum &mdash; PySpecTcl 0.3.3 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -206,6 +206,28 @@
 <dt class="sig sig-object py" id="spectcl.Spectrum.plot">
 <span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot spectrum data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ax</strong> (<em>Axes</em>) – Axes object, e.g., could be created by matplotlib.pyplot.subplots().</p>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>figsize</strong> (<em>tuple</em>) – Tuple of figure width and height, default is (10, 8).</p></li>
+<li><p><strong>fontsize</strong> (<em>int</em>) – Font size, default is 12.</p></li>
+<li><p><strong>s</strong> (<em>float</em>) – Point size for 2D plot, default is 4.0.</p></li>
+<li><p><strong>cmap</strong> (<em>str</em>) – Colormap name for 2D plot, default is ‘jet’.</p></li>
+<li><p><strong>legend</strong> (<em>bool</em>) – If show legend or not for 1D plot, default is False.</p></li>
+<li><p><strong>ds</strong> (<em>str</em>) – Draw line style for 1D plot, default is ‘steps’.</p></li>
+<li><p><strong>arguments.</strong> (<em>and other matplotlib.pyplot.plot</em><em>(</em><em>)</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>o</strong></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Axes</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

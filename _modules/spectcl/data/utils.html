@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spectcl.data.utils &mdash; PySpecTcl 0.3.2 documentation</title>
+  <title>spectcl.data.utils &mdash; PySpecTcl 0.3.3 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -75,6 +75,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">requests.adapters</span> <span class="kn">import</span> <span class="n">HTTPAdapter</span>
 <span class="kn">from</span> <span class="nn">spectcl.contrib</span> <span class="kn">import</span> <span class="n">to_image_tuple</span>
 
@@ -294,7 +295,7 @@
         <span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_channel</span><span class="p">):</span>
             <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="s1">&#39;low&#39;</span><span class="p">],</span> <span class="n">ax</span><span class="p">[</span><span class="s1">&#39;high&#39;</span><span class="p">],</span> <span class="n">ax</span><span class="p">[</span><span class="s1">&#39;bins&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_world</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">low</span> <span class="o">+</span> <span class="n">v</span> <span class="o">*</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="n">bins</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_axes_map_fn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">lambda</span> <span class="n">ch</span><span class="p">:</span> <span class="n">low</span> <span class="o">+</span> <span class="n">ch</span> <span class="o">*</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="n">bins</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_axes_map_fn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_map_fn</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">bins</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Spectrum.del_gate"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.del_gate">[docs]</a>    <span class="k">def</span> <span class="nf">del_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
@@ -321,6 +322,31 @@
 
 <div class="viewcode-block" id="Spectrum.plot"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Plot spectrum data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ax : Axes</span>
+<span class="sd">            Axes object, e.g., could be created by matplotlib.pyplot.subplots().</span>
+
+<span class="sd">        Keyword Arguments</span>
+<span class="sd">        -----------------</span>
+<span class="sd">        figsize : tuple</span>
+<span class="sd">            Tuple of figure width and height, default is (10, 8).</span>
+<span class="sd">        fontsize : int</span>
+<span class="sd">            Font size, default is 12.</span>
+<span class="sd">        s : float</span>
+<span class="sd">            Point size for 2D plot, default is 4.0.</span>
+<span class="sd">        cmap : str</span>
+<span class="sd">            Colormap name for 2D plot, default is &#39;jet&#39;.</span>
+<span class="sd">        legend : bool</span>
+<span class="sd">            If show legend or not for 1D plot, default is False.</span>
+<span class="sd">        ds : str</span>
+<span class="sd">            Draw line style for 1D plot, default is &#39;steps&#39;.</span>
+<span class="sd">        and other matplotlib.pyplot.plot() arguments.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        o : Axes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
@@ -346,6 +372,10 @@
             <span class="k">return</span> <span class="n">r</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_map_fn</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">ch</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">low</span> <span class="o">+</span> <span class="n">ch</span> <span class="o">*</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="n">bins</span>
 
 
 <span class="n">ACTION_PARAMS</span> <span class="o">=</span> <span class="n">toml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">CDIR_PATH</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;action.toml&quot;</span><span class="p">))</span>
