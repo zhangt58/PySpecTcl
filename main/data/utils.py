@@ -7,6 +7,7 @@ import pathlib
 from functools import partial
 from requests.adapters import HTTPAdapter
 from spectcl.contrib import to_image_tuple
+from .stats import weighted_stats
 
 CDIR_PATH = pathlib.Path(__file__).parent
 
@@ -54,8 +55,6 @@ class Spectrum(object):
 
     Keyword Arguments
     -----------------
-    map : bool
-        If do coordinate mapping from channel to world, by default is True.
     client : SpecTclClient
         SpecTclClient instance.
     """
@@ -63,15 +62,13 @@ class Spectrum(object):
         self._axes_values_channel = [] # list of arrays for all axes in channel coordinate
         self._axes_values_world = []   # list of arrays for all axes in world coordinate
         self._axes_map_fn = []         # list of func to map channel to world
-        self.name = name # == conf.index.values[0]
-        self.data = data
+        self.name = name  # == conf.index.values[0]
+        self.data = data  # update self._axes_values_channel
         self.parameters = conf.Parameters
         self.axes = conf.Axes
         self.stype = conf.Type
         self.dtype = conf.ChanType
-        # map axes?
-        if kws.get('map', True):
-            self.map_data()
+        self.map_data()
         # client
         self.client = kws.get('client', None)
 
@@ -109,27 +106,28 @@ class Spectrum(object):
         else:
             return self._axes_values_channel
 
-    def get_data(self, map=True, with_label=True):
+    def get_data(self, map=True) -> pd.DataFrame:
         """Return the table of spectral data.
 
         Parameters
         ----------
         map : bool
-            If do coordinate mapping from channel to world, by default is True.
-        with_label : bool
-            If set, return the table with expected column names, by default is True.
+            If True, return mapped coordinate from channel to world.
+
+        Returns
+        -------
+        df : DataFrame
+            
         """
         if map:
-            _d = self._data.copy()
-            for ax_name, fn in zip(('x', 'y'), self._axes_map_fn):
-                _d[ax_name] = _d[ax_name].apply(fn)
-            r = _d
+            # return a dataframe with mapped data (world coordinate), name column with parameter
+            return self._data[self.parameters + ['count']]
         else:
-            r = self._data
-        if with_label:
-            r.rename(columns=dict(zip(('x', 'y'), self.parameters)), inplace=True)
-            r.rename(columns={'v': 'count'}, inplace=True)
-        return r
+            # return x, [y], count columns of channel coordinate
+            df = self._data.loc[:, ~self._data.columns.isin(self.parameters)]
+            count_col = df.pop('count')
+            df.insert(len(df.columns), 'count', count_col)
+            return df
 
     @property
     def parameters(self):
@@ -209,22 +207,22 @@ class Spectrum(object):
             _x, _y = self._axes_values_channel
         return to_image_tuple(self.data, x=_x, y=_y, **kws)
 
-    def map_data(self, **kws):
-        """Map data from channel coordinate to world coordinate.
-
-        Keyword Arguments
-        -----------------
-        force : bool
-            If set, refresh the world coordinate values, otherwise override the existing one.
+    def map_data(self):
+        """Map data from channel coordinate to world coordinate, add as new columns.
         """
-        if kws.get('force', False):
-            return self._axes_values_world
         self._axes_values_world = []
         self._axes_map_fn = []
         for ax, v in zip(self.axes, self._axes_values_channel):
             low, high, bins = ax['low'], ax['high'], ax['bins']
             self._axes_values_world.append(low + v * (high - low) / bins)
             self._axes_map_fn.append(partial(_map_fn, low, high, bins))
+            
+        # add column(s) for world coordinate data.
+        for u, p, fn in zip(('x', 'y'), self.parameters, self._axes_map_fn):
+            self._data[p] = self._data[u].apply(fn)
+        #
+        self._data.rename(columns={'v': 'count'}, inplace=True)
+        self._data.index.name = 'id'
 
     def del_gate(self):
         pass
