@@ -3,6 +3,7 @@
 """Visualize a spectrum.
 """
 
+import numpy as np
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from matplotlib.gridspec import GridSpec
 import matplotlib.pyplot as plt
@@ -11,7 +12,10 @@ import matplotlib.pyplot as plt
 def get_axes_grid(nrows, ncols, w, h, **kws):
     """Get the axes grid.
     """
-    gs = GridSpec(nrows, ncols, width_ratios=[w, w * 0.2][:nrows], height_ratios=[h, h * 0.2][:ncols],
+    gs = GridSpec(nrows,
+                  ncols,
+                  width_ratios=[w, w * 0.2][:nrows],
+                  height_ratios=[h, h * 0.2][:ncols],
                   wspace=kws.pop('wspace', 0.04),
                   hspace=kws.pop('hspace', 0.04))
     fig = plt.figure(figsize=kws.pop('figsize', (8, 6)))
@@ -31,8 +35,12 @@ def get_axes_grid(nrows, ncols, w, h, **kws):
         return fig, ax0
 
 
-def plot_image(sp, show_profile=True, show_colorbar=True,
-               fillna=False, mapped=True, **kws):
+def plot_image(sp,
+               show_profile=True,
+               show_colorbar=True,
+               fillna=False,
+               mapped=True,
+               **kws):
     """Visualize a 2D spectrum.
 
     Parameters
@@ -82,26 +90,43 @@ def plot_image(sp, show_profile=True, show_colorbar=True,
     # axes grid
     h, w = c_arr.shape
     if show_profile:
-        fig, ax = get_axes_grid(2, 2, w, h, figsize=kws.pop('figsize', (8, 6)), wspace=kws.pop('wspace', 0.01), hspace=kws.pop('hspace', 0.01))
+        fig, ax = get_axes_grid(2,
+                                2,
+                                w,
+                                h,
+                                figsize=kws.pop('figsize', (8, 6)),
+                                wspace=kws.pop('wspace', 0.01),
+                                hspace=kws.pop('hspace', 0.01))
         [ax_im, ax_yprof, ax_xprof] = ax
     else:
-        fig, ax_im = get_axes_grid(1, 1, w, h, figsize=kws.pop('figsize', (8, 6)))
+        fig, ax_im = get_axes_grid(1,
+                                   1,
+                                   w,
+                                   h,
+                                   figsize=kws.pop('figsize', (8, 6)))
 
     # image
-    im = ax_im.imshow(c_arr, cmap=kws.pop('cmap', 'jet'), origin='lower', aspect=kws.get('aspect', 'auto'))
+    im = ax_im.imshow(c_arr,
+                      cmap=kws.pop('cmap', 'jet'),
+                      origin='lower',
+                      aspect=kws.get('aspect', 'auto'))
 
     # colorbar
     if show_colorbar:
-        cax_im = make_axes_locatable(ax_im).append_axes("top", size="3%", pad="0.8%")
+        cax_im = make_axes_locatable(ax_im).append_axes("top",
+                                                        size="3%",
+                                                        pad="0.8%")
         cb_im = fig.colorbar(im, cax=cax_im, orientation="horizontal")
         cax_im.xaxis.set_ticks_position("top")
         cax_im.tick_params(labelsize=8)
 
-    if mapped: # show in world coordinate
-        df = sp.get_data(True).rename(columns={i: j for i, j in zip(sp.parameters, ('x', 'y'))})
+    if mapped:  # show in world coordinate
+        df = sp.get_data(True).rename(
+            columns={i: j
+                     for i, j in zip(sp.parameters, ('x', 'y'))})
         xmin, xmax, ymin, ymax = xmin_w, xmax_w, ymin_w, ymax_w
         xlbl, ylbl = sp.parameters
-    else: # channel coordinate
+    else:  # channel coordinate
         xlbl, ylbl = 'x', 'y'
 
     # set image extent
@@ -111,11 +136,21 @@ def plot_image(sp, show_profile=True, show_colorbar=True,
     if show_profile:
         xprof = df.groupby('x')['count'].sum().to_frame().reset_index()
         yprof = df.groupby('y')['count'].sum().to_frame().reset_index()
-        xline = xprof.plot(x='x', y='count', ax=ax_xprof, legend=False,
-                           ds='steps', c='b', xlim=[xmin, xmax],
+        xline = xprof.plot(x='x',
+                           y='count',
+                           ax=ax_xprof,
+                           legend=False,
+                           ds='steps',
+                           c='b',
+                           xlim=[xmin, xmax],
                            xlabel=xlbl)
-        yline = yprof.plot(x='count', y='y', ax=ax_yprof, legend=False,
-                           ds='steps', c='r', ylim=[ymin, ymax])
+        yline = yprof.plot(x='count',
+                           y='y',
+                           ax=ax_yprof,
+                           legend=False,
+                           ds='steps',
+                           c='r',
+                           ylim=[ymin, ymax])
 
         # align grid
         pos = [i.get_position() for i in ax]
@@ -123,21 +158,38 @@ def plot_image(sp, show_profile=True, show_colorbar=True,
             fac = 0.962
         else:
             fac = 1.0
-        ax[1].set_position([pos[1].x0, pos[0].y0, pos[1].width, pos[0].height * fac])
+        ax[1].set_position(
+            [pos[1].x0, pos[0].y0, pos[1].width, pos[0].height * fac])
         ax[2].set_position([pos[0].x0, pos[2].y0, pos[0].width, pos[2].height])
 
     # adjust xyprofile xylabels
     ax_xprof.yaxis.set_ticks_position("right")
     ax_yprof.xaxis.set_ticks_position("top")
     ax_yprof.set_xlabel('')
-    ax_yprof.annotate("count", (0.82, 0.165), fontsize=10, xycoords='figure fraction',
-                   bbox={'boxstyle': 'round,pad=0.25','fc':'0.8','ec':'0.5','lw':0.5,'alpha':0.8})
+    ax_yprof.annotate("count", (0.82, 0.165),
+                      fontsize=10,
+                      xycoords='figure fraction',
+                      bbox={
+                          'boxstyle': 'round,pad=0.25',
+                          'fc': '0.8',
+                          'ec': '0.5',
+                          'lw': 0.5,
+                          'alpha': 0.8
+                      })
 
     # set ylabel
     ax_im.set_ylabel(ylbl)
 
     # set title
-    ax_im.annotate(sp.name, (0.01, 0.95), fontsize=14, xycoords='figure fraction',
-                   bbox={'boxstyle': 'round,pad=0.25','fc':'0.85','ec':'0.5','lw':0.5,'alpha':0.8})
+    ax_im.annotate(sp.name, (0.01, 0.95),
+                   fontsize=14,
+                   xycoords='figure fraction',
+                   bbox={
+                       'boxstyle': 'round,pad=0.25',
+                       'fc': '0.85',
+                       'ec': '0.5',
+                       'lw': 0.5,
+                       'alpha': 0.8
+                   })
     #
     return fig, (ax_im, ax_xprof, ax_yprof)
