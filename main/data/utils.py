@@ -253,7 +253,7 @@ class Spectrum(object):
         Parameters
         ----------
         ax : Axes
-            Axes object, e.g., could be created by matplotlib.pyplot.subplots().
+            Axes object (1D only)
 
         Keyword Arguments
         -----------------
@@ -261,8 +261,6 @@ class Spectrum(object):
             Tuple of figure width and height, default is (10, 8).
         fontsize : int
             Font size, default is 12.
-        s : float
-            Point size for 2D plot, default is 4.0.
         cmap : str
             Colormap name for 2D plot, default is 'viridis'.
         legend : bool
@@ -276,14 +274,15 @@ class Spectrum(object):
         r : Axes, List[Axes]
             Axes for 1D, and (ax_image, ax_xprofile, ax_yprofile) for 2D spectrum.
         """
-        if ax is None:
-            _, ax = plt.subplots()
         figsize = kws.pop('figsize', (10, 8))
         fontsize = kws.pop('fontsize', 12)
         if self.stype == '2D':
-            _, (ax_im, ax_xprof, ax_yprof) = plot_image(self, figsize=figsize, cmap=kws.pop('cmap', 'viridis'))
+            _, (ax_im, ax_xprof, ax_yprof) = plot_image(self, figsize=figsize,
+                                                        cmap=kws.pop('cmap', 'viridis'), **kws)
             return (ax_im, ax_xprof, ax_yprof)
         elif self.stype == '1D':
+            if ax is None:
+                _, ax = plt.subplots()
             xcol, = self.parameters
             r = self.get_data().plot(kind='line', x=xcol, y='count', ax=ax, figsize=figsize,
                                      legend=kws.pop('legend', False), **kws)

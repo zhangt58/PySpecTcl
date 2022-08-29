@@ -56,6 +56,8 @@ def plot_image(sp, show_profile=True, show_colorbar=True,
         Figure width and height size in inch, defautl is (8, 6).
     aspect : str, float
         Image aspect ratio, default is 'auto', could be 'equal', or a float number.
+    wspace, hspace : float
+        Grid space in w and h.
 
     Returns
     -------
@@ -80,7 +82,7 @@ def plot_image(sp, show_profile=True, show_colorbar=True,
     # axes grid
     h, w = c_arr.shape
     if show_profile:
-        fig, ax = get_axes_grid(2, 2, w, h, figsize=kws.pop('figsize', (8, 6)), wspace=0.01, hspace=0.04)
+        fig, ax = get_axes_grid(2, 2, w, h, figsize=kws.pop('figsize', (8, 6)), wspace=kws.pop('wspace', 0.01), hspace=kws.pop('hspace', 0.04))
         [ax_im, ax_yprof, ax_xprof] = ax
     else:
         fig, ax_im = get_axes_grid(1, 1, w, h, figsize=kws.pop('figsize', (8, 6)))
