@@ -12,17 +12,17 @@ from .plot import plot_image
 
 CDIR_PATH = pathlib.Path(__file__).parent
 
-
 DTYPE_MAP = {
     'short': np.dtype('i'),  # int8
     'word': np.dtype('i2'),  # int16
     'long': np.dtype('i4'),  # int32
 }
 STYPE_MAP = {
-    '1' : '1D',
-    '2' : '2D',
-    's' : 's',
+    '1': '1D',
+    '2': '2D',
+    's': 's',
 }
+
 
 class MyAdapter(HTTPAdapter):
     pass
@@ -60,9 +60,11 @@ class Spectrum(object):
         SpecTclClient instance.
     """
     def __init__(self, name, conf, data, **kws):
-        self._axes_values_channel = [] # list of arrays for all axes in channel coordinate
-        self._axes_values_world = []   # list of arrays for all axes in world coordinate
-        self._axes_map_fn = []         # list of func to map channel to world
+        self._axes_values_channel = [
+        ]  # list of arrays for all axes in channel coordinate
+        self._axes_values_world = [
+        ]  # list of arrays for all axes in world coordinate
+        self._axes_map_fn = []  # list of func to map channel to world
         self.name = name  # == conf.index.values[0]
         self.data = data  # update self._axes_values_channel
         self.parameters = conf.Parameters
@@ -173,6 +175,7 @@ class Spectrum(object):
         return f"Spectrum '{self.name}': [{len(self.parameters)}] parameters, [{self.data.shape[0]}] entries."
 
     __repr__ = __str__
+
     def _repr_html_(self, *args, **kws):
         dfhtml = self._data._repr_html_(*args, **kws)
         return f'<h4>{str(self)}</h4>' + '<br>' + dfhtml
@@ -247,20 +250,34 @@ class Spectrum(object):
 
     gate = property(get_gate, set_gate, del_gate, "Gate")
 
-    def plot(self, ax=None, **kws):
+    def plot(self,
+             ax=None,
+             show_colorbar=True,
+             show_profile=True,
+             fillna=True,
+             mapped=True,
+             **kws):
         """Plot spectrum data.
 
         Parameters
         ----------
         ax : Axes
             Axes object (1D only)
+        show_colorbar : bool
+            If show colorbar or not.
+        show_profile : bool
+            If show x,y profile or not.
+        fillna : bool
+            If fill empty count as nan, otherwise fill with zero.
+        mapped : bool
+            If show data in mapped coordinate (world), otherwise show in channel coordinate.
 
         Keyword Arguments
         -----------------
         figsize : tuple
             Tuple of figure width and height, default is (10, 8).
         fontsize : int
-            Font size, default is 12.
+            Font size, default is 12 (1D only).
         cmap : str
             Colormap name for 2D plot, default is 'viridis'.
         legend : bool
@@ -277,15 +294,27 @@ class Spectrum(object):
         figsize = kws.pop('figsize', (10, 8))
         fontsize = kws.pop('fontsize', 12)
         if self.stype == '2D':
-            _, (ax_im, ax_xprof, ax_yprof) = plot_image(self, figsize=figsize,
-                                                        cmap=kws.pop('cmap', 'viridis'), **kws)
+            _, (ax_im, ax_xprof,
+                ax_yprof) = plot_image(self,
+                                       show_profile,
+                                       show_colorbar,
+                                       fillna,
+                                       mapped,
+                                       figsize=figsize,
+                                       cmap=kws.pop('cmap', 'viridis'),
+                                       **kws)
             return (ax_im, ax_xprof, ax_yprof)
         elif self.stype == '1D':
             if ax is None:
                 _, ax = plt.subplots()
             xcol, = self.parameters
-            r = self.get_data().plot(kind='line', x=xcol, y='count', ax=ax, figsize=figsize,
-                                     legend=kws.pop('legend', False), **kws)
+            r = self.get_data().plot(kind='line',
+                                     x=xcol,
+                                     y='count',
+                                     ax=ax,
+                                     figsize=figsize,
+                                     legend=kws.pop('legend', False),
+                                     **kws)
             ax.set_xlabel(xcol, fontsize=fontsize)
             ax.set_ylabel('Count', fontsize=fontsize)
             ax.set_title(self.name, fontsize=fontsize + 2)
