@@ -82,7 +82,7 @@ def plot_image(sp, show_profile=True, show_colorbar=True,
     # axes grid
     h, w = c_arr.shape
     if show_profile:
-        fig, ax = get_axes_grid(2, 2, w, h, figsize=kws.pop('figsize', (8, 6)), wspace=kws.pop('wspace', 0.01), hspace=kws.pop('hspace', 0.04))
+        fig, ax = get_axes_grid(2, 2, w, h, figsize=kws.pop('figsize', (8, 6)), wspace=kws.pop('wspace', 0.01), hspace=kws.pop('hspace', 0.01))
         [ax_im, ax_yprof, ax_xprof] = ax
     else:
         fig, ax_im = get_axes_grid(1, 1, w, h, figsize=kws.pop('figsize', (8, 6)))
