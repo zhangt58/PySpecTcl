@@ -124,6 +124,13 @@ def plot_image(sp, show_profile=True, show_colorbar=True,
         ax[1].set_position([pos[1].x0, pos[0].y0, pos[1].width, pos[0].height * fac])
         ax[2].set_position([pos[0].x0, pos[2].y0, pos[0].width, pos[2].height])
 
+    # adjust xyprofile xylabels
+    ax_xprof.yaxis.set_ticks_position("right")
+    ax_yprof.xaxis.set_ticks_position("top")
+    ax_yprof.set_xlabel('')
+    ax_yprof.annotate("count", (0.82, 0.165), fontsize=10, xycoords='figure fraction',
+                   bbox={'boxstyle': 'round,pad=0.25','fc':'0.8','ec':'0.5','lw':0.5,'alpha':0.8})
+
     # set ylabel
     ax_im.set_ylabel(ylbl)
 
