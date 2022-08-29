@@ -5,6 +5,7 @@
 
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from matplotlib.gridspec import GridSpec
+import matplotlib.pyplot as plt
 
 
 def get_axes_grid(nrows, ncols, w, h, **kws):

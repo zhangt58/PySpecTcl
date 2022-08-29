@@ -8,6 +8,7 @@ from functools import partial
 from requests.adapters import HTTPAdapter
 from spectcl.contrib import to_image_tuple
 from .stats import weighted_stats
+from .plot import plot_image
 
 CDIR_PATH = pathlib.Path(__file__).parent
 
@@ -106,7 +107,7 @@ class Spectrum(object):
         else:
             return self._axes_values_channel
 
-    def get_data(self, map=True) -> pd.DataFrame:
+    def get_data(self, map=True):
         """Return the table of spectral data.
 
         Parameters
@@ -117,7 +118,6 @@ class Spectrum(object):
         Returns
         -------
         df : DataFrame
-            
         """
         if map:
             # return a dataframe with mapped data (world coordinate), name column with parameter
@@ -216,7 +216,7 @@ class Spectrum(object):
             low, high, bins = ax['low'], ax['high'], ax['bins']
             self._axes_values_world.append(low + v * (high - low) / bins)
             self._axes_map_fn.append(partial(_map_fn, low, high, bins))
-            
+
         # add column(s) for world coordinate data.
         for u, p, fn in zip(('x', 'y'), self.parameters, self._axes_map_fn):
             self._data[p] = self._data[u].apply(fn)
@@ -264,7 +264,7 @@ class Spectrum(object):
         s : float
             Point size for 2D plot, default is 4.0.
         cmap : str
-            Colormap name for 2D plot, default is 'jet'.
+            Colormap name for 2D plot, default is 'viridis'.
         legend : bool
             If show legend or not for 1D plot, default is False.
         ds : str
@@ -273,21 +273,16 @@ class Spectrum(object):
 
         Returns
         -------
-        o : Axes
+        r : Axes, List[Axes]
+            Axes for 1D, and (ax_image, ax_xprofile, ax_yprofile) for 2D spectrum.
         """
         if ax is None:
             _, ax = plt.subplots()
         figsize = kws.pop('figsize', (10, 8))
         fontsize = kws.pop('fontsize', 12)
         if self.stype == '2D':
-            xcol, ycol = self.parameters
-            r = self.get_data().plot(kind='scatter', x=xcol, y=ycol,
-                                     c='count', s=kws.pop('s', 4), cmap=kws.pop('cmap', 'jet'),
-                                     ax=ax, figsize=figsize, **kws)
-            ax.set_xlabel(xcol, fontsize=fontsize)
-            ax.set_ylabel(ycol, fontsize=fontsize)
-            ax.set_title(self.name, fontsize=fontsize + 2)
-            return r
+            _, (ax_im, ax_xprof, ax_yprof) = plot_image(self, figsize=figsize, cmap=kws.pop('cmap', 'viridis'))
+            return (ax_im, ax_xprof, ax_yprof)
         elif self.stype == '1D':
             xcol, = self.parameters
             r = self.get_data().plot(kind='line', x=xcol, y='count', ax=ax, figsize=figsize,
