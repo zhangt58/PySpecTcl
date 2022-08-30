@@ -63,6 +63,8 @@ def plot_image(sp,
     -----------------
     cmap : str
         Colormap of the image, default is 'viridis'.
+    clim : tuple
+        Color range.
     figsize : tuple
         Figure width and height size in inch, defautl is (8, 6).
     aspect : str, float
@@ -114,6 +116,7 @@ def plot_image(sp,
                       origin='lower',
                       aspect=kws.get('aspect', 'auto'),
                       interpolation=kws.get('interpolation', 'none'))
+    im.set_clim(kws.pop('clim', None))
 
     # colorbar
     if show_colorbar:

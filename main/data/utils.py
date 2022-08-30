@@ -281,6 +281,8 @@ class Spectrum(object):
             Limit range along x axis.
         ylim : tuple
             Limit range along y axis.
+        clim : tuple
+            Color range for 2D image.
         figsize : tuple
             Tuple of figure width and height, default is (10, 8).
         fontsize : int
@@ -312,6 +314,7 @@ class Spectrum(object):
                                        mapped,
                                        figsize=figsize,
                                        cmap=kws.pop('cmap', 'viridis'),
+                                       clim=kws.pop('clim', None),
                                        **kws)
             ax_im.set_xlim(xlim)
             ax_im.set_ylim(ylim)
