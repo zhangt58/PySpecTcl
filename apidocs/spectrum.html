@@ -93,10 +93,7 @@
 </ul>
 </dd>
 <dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>map</strong> (<em>bool</em>) – If do coordinate mapping from channel to world, by default is True.</p></li>
-<li><p><strong>client</strong> (<em>SpecTclClient</em>) – SpecTclClient instance.</p></li>
-</ul>
+<dd class="field-even"><p><strong>client</strong> (<em>SpecTclClient</em>) – SpecTclClient instance.</p>
 </dd>
 </dl>
 <dl class="py property">
@@ -151,14 +148,17 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.Spectrum.get_data">
-<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.get_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.get_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the table of spectral data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>map</strong> (<em>bool</em>) – If do coordinate mapping from channel to world, by default is True.</p></li>
-<li><p><strong>with_label</strong> (<em>bool</em>) – If set, return the table with expected column names, by default is True.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>map</strong> (<em>bool</em>) – If True, return mapped coordinate from channel to world.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>df</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -171,13 +171,8 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.Spectrum.map_data">
-<span class="sig-name descname"><span class="pre">map_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.map_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.map_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Map data from channel coordinate to world coordinate.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Keyword Arguments</dt>
-<dd class="field-odd"><p><strong>force</strong> (<em>bool</em>) – If set, refresh the world coordinate values, otherwise override the existing one.</p>
-</dd>
-</dl>
+<span class="sig-name descname"><span class="pre">map_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.map_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.map_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map data from channel coordinate to world coordinate, add as new columns.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -204,28 +199,37 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.Spectrum.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.plot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapped</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot spectrum data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>ax</strong> (<em>Axes</em>) – Axes object, e.g., could be created by matplotlib.pyplot.subplots().</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>Axes</em>) – Axes object (1D only)</p></li>
+<li><p><strong>show_colorbar</strong> (<em>bool</em>) – If show colorbar or not.</p></li>
+<li><p><strong>show_profile</strong> (<em>bool</em>) – If show x,y profile or not.</p></li>
+<li><p><strong>show_grid</strong> (<em>bool</em>) – If show grid on x,y profile plots (1D plot) or not.</p></li>
+<li><p><strong>fillna</strong> (<em>bool</em>) – If fill empty count as nan, otherwise fill with zero.</p></li>
+<li><p><strong>mapped</strong> (<em>bool</em>) – If show data in mapped coordinate (world), otherwise show in channel coordinate.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Keyword Arguments</dt>
 <dd class="field-even"><ul class="simple">
+<li><p><strong>xlim</strong> (<em>tuple</em>) – Limit range along x axis.</p></li>
+<li><p><strong>ylim</strong> (<em>tuple</em>) – Limit range along y axis.</p></li>
+<li><p><strong>clim</strong> (<em>tuple</em>) – Color range for 2D image.</p></li>
 <li><p><strong>figsize</strong> (<em>tuple</em>) – Tuple of figure width and height, default is (10, 8).</p></li>
-<li><p><strong>fontsize</strong> (<em>int</em>) – Font size, default is 12.</p></li>
-<li><p><strong>s</strong> (<em>float</em>) – Point size for 2D plot, default is 4.0.</p></li>
-<li><p><strong>cmap</strong> (<em>str</em>) – Colormap name for 2D plot, default is ‘jet’.</p></li>
+<li><p><strong>fontsize</strong> (<em>int</em>) – Font size, default is 12 (1D only).</p></li>
+<li><p><strong>cmap</strong> (<em>str</em>) – Colormap name for 2D plot, default is ‘viridis’.</p></li>
 <li><p><strong>legend</strong> (<em>bool</em>) – If show legend or not for 1D plot, default is False.</p></li>
 <li><p><strong>ds</strong> (<em>str</em>) – Draw line style for 1D plot, default is ‘steps’.</p></li>
 <li><p><strong>arguments.</strong> (<em>and other matplotlib.pyplot.plot</em><em>(</em><em>)</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>o</strong></p>
+<dd class="field-odd"><p><strong>r</strong> – Axes for 1D, and (ax_image, ax_xprofile, ax_yprofile) for 2D spectrum.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Axes</p>
+<dd class="field-even"><p>Axes, List[Axes]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -234,6 +238,20 @@
 <dt class="sig sig-object py" id="spectcl.Spectrum.set_gate">
 <span class="sig-name descname"><span class="pre">set_gate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.set_gate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.set_gate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set/update with <em>gate</em>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectcl.Spectrum.stats">
+<span class="sig-name descname"><span class="pre">stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapped</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the statistical info.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>r</strong> – Keys: ‘sum’, ‘mean’, ‘std’, ‘fwhm’.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">

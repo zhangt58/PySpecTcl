@@ -74,13 +74,15 @@
 <span class="kn">import</span> <span class="nn">toml</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">requests.adapters</span> <span class="kn">import</span> <span class="n">HTTPAdapter</span>
 <span class="kn">from</span> <span class="nn">spectcl.contrib</span> <span class="kn">import</span> <span class="n">to_image_tuple</span>
+<span class="kn">from</span> <span class="nn">.stats</span> <span class="kn">import</span> <span class="n">weighted_stats</span>
+<span class="kn">from</span> <span class="nn">.plot</span> <span class="kn">import</span> <span class="n">plot_image</span>
 
 <span class="n">CDIR_PATH</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
-
 
 <span class="n">DTYPE_MAP</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;short&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">),</span>  <span class="c1"># int8</span>
@@ -88,10 +90,11 @@
     <span class="s1">&#39;long&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;i4&#39;</span><span class="p">),</span>  <span class="c1"># int32</span>
 <span class="p">}</span>
 <span class="n">STYPE_MAP</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;1&#39;</span> <span class="p">:</span> <span class="s1">&#39;1D&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;2&#39;</span> <span class="p">:</span> <span class="s1">&#39;2D&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;s&#39;</span> <span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="s1">&#39;1D&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="s1">&#39;2D&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span>
 <span class="p">}</span>
+
 
 <span class="k">class</span> <span class="nc">MyAdapter</span><span class="p">(</span><span class="n">HTTPAdapter</span><span class="p">):</span>
     <span class="k">pass</span>
@@ -125,24 +128,22 @@
 
 <span class="sd">    Keyword Arguments</span>
 <span class="sd">    -----------------</span>
-<span class="sd">    map : bool</span>
-<span class="sd">        If do coordinate mapping from channel to world, by default is True.</span>
 <span class="sd">    client : SpecTclClient</span>
 <span class="sd">        SpecTclClient instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_channel</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># list of arrays for all axes in channel coordinate</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_world</span> <span class="o">=</span> <span class="p">[]</span>   <span class="c1"># list of arrays for all axes in world coordinate</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_axes_map_fn</span> <span class="o">=</span> <span class="p">[]</span>         <span class="c1"># list of func to map channel to world</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="c1"># == conf.index.values[0]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_channel</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">]</span>  <span class="c1"># list of arrays for all axes in channel coordinate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_world</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">]</span>  <span class="c1"># list of arrays for all axes in world coordinate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes_map_fn</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of func to map channel to world</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1"># == conf.index.values[0]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>  <span class="c1"># update self._axes_values_channel</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">Parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">Axes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">Type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">ChanType</span>
-        <span class="c1"># map axes?</span>
-        <span class="k">if</span> <span class="n">kws</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;map&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">map_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_data</span><span class="p">()</span>
         <span class="c1"># client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;client&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
@@ -180,27 +181,27 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_channel</span></div>
 
-<div class="viewcode-block" id="Spectrum.get_data"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_label</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Spectrum.get_data"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the table of spectral data.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        map : bool</span>
-<span class="sd">            If do coordinate mapping from channel to world, by default is True.</span>
-<span class="sd">        with_label : bool</span>
-<span class="sd">            If set, return the table with expected column names, by default is True.</span>
+<span class="sd">            If True, return mapped coordinate from channel to world.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        df : DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">map</span><span class="p">:</span>
-            <span class="n">_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">ax_name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axes_map_fn</span><span class="p">):</span>
-                <span class="n">_d</span><span class="p">[</span><span class="n">ax_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_d</span><span class="p">[</span><span class="n">ax_name</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">_d</span>
+            <span class="c1"># return a dataframe with mapped data (world coordinate), name column with parameter</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
-        <span class="k">if</span> <span class="n">with_label</span><span class="p">:</span>
-            <span class="n">r</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">((</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">r</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;count&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">r</span></div>
+            <span class="c1"># return x, [y], count columns of channel coordinate</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)]</span>
+            <span class="n">count_col</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">count_col</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">df</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -246,6 +247,7 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Spectrum &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;: [</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span><span class="si">}</span><span class="s2">] parameters, [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">] entries.&quot;</span>
 
     <span class="fm">__repr__</span> <span class="o">=</span> <span class="fm">__str__</span>
+
     <span class="k">def</span> <span class="nf">_repr_html_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="n">dfhtml</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">_repr_html_</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;h4&gt;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/h4&gt;&#39;</span> <span class="o">+</span> <span class="s1">&#39;&lt;br&gt;&#39;</span> <span class="o">+</span> <span class="n">dfhtml</span>
@@ -280,22 +282,22 @@
             <span class="n">_x</span><span class="p">,</span> <span class="n">_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_channel</span>
         <span class="k">return</span> <span class="n">to_image_tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">_x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">_y</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Spectrum.map_data"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.map_data">[docs]</a>    <span class="k">def</span> <span class="nf">map_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Map data from channel coordinate to world coordinate.</span>
-
-<span class="sd">        Keyword Arguments</span>
-<span class="sd">        -----------------</span>
-<span class="sd">        force : bool</span>
-<span class="sd">            If set, refresh the world coordinate values, otherwise override the existing one.</span>
+<div class="viewcode-block" id="Spectrum.map_data"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.map_data">[docs]</a>    <span class="k">def</span> <span class="nf">map_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Map data from channel coordinate to world coordinate, add as new columns.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">kws</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;force&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_world</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_world</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_axes_map_fn</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_channel</span><span class="p">):</span>
             <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="s1">&#39;low&#39;</span><span class="p">],</span> <span class="n">ax</span><span class="p">[</span><span class="s1">&#39;high&#39;</span><span class="p">],</span> <span class="n">ax</span><span class="p">[</span><span class="s1">&#39;bins&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_axes_values_world</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">low</span> <span class="o">+</span> <span class="n">v</span> <span class="o">*</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="n">bins</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_axes_map_fn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_map_fn</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">bins</span><span class="p">))</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_axes_map_fn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_map_fn</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">bins</span><span class="p">))</span>
+
+        <span class="c1"># add column(s) for world coordinate data.</span>
+        <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axes_map_fn</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">u</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+        <span class="c1">#</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;count&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;id&#39;</span></div>
 
 <div class="viewcode-block" id="Spectrum.del_gate"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.del_gate">[docs]</a>    <span class="k">def</span> <span class="nf">del_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
@@ -320,24 +322,45 @@
 
     <span class="n">gate</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_gate</span><span class="p">,</span> <span class="n">set_gate</span><span class="p">,</span> <span class="n">del_gate</span><span class="p">,</span> <span class="s2">&quot;Gate&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Spectrum.plot"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+<div class="viewcode-block" id="Spectrum.plot"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">show_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+             <span class="n">show_profile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+             <span class="n">show_grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+             <span class="n">fillna</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+             <span class="n">mapped</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Plot spectrum data.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        ax : Axes</span>
-<span class="sd">            Axes object, e.g., could be created by matplotlib.pyplot.subplots().</span>
+<span class="sd">            Axes object (1D only)</span>
+<span class="sd">        show_colorbar : bool</span>
+<span class="sd">            If show colorbar or not.</span>
+<span class="sd">        show_profile : bool</span>
+<span class="sd">            If show x,y profile or not.</span>
+<span class="sd">        show_grid : bool</span>
+<span class="sd">            If show grid on x,y profile plots (1D plot) or not.</span>
+<span class="sd">        fillna : bool</span>
+<span class="sd">            If fill empty count as nan, otherwise fill with zero.</span>
+<span class="sd">        mapped : bool</span>
+<span class="sd">            If show data in mapped coordinate (world), otherwise show in channel coordinate.</span>
 
 <span class="sd">        Keyword Arguments</span>
 <span class="sd">        -----------------</span>
+<span class="sd">        xlim : tuple</span>
+<span class="sd">            Limit range along x axis.</span>
+<span class="sd">        ylim : tuple</span>
+<span class="sd">            Limit range along y axis.</span>
+<span class="sd">        clim : tuple</span>
+<span class="sd">            Color range for 2D image.</span>
 <span class="sd">        figsize : tuple</span>
 <span class="sd">            Tuple of figure width and height, default is (10, 8).</span>
 <span class="sd">        fontsize : int</span>
-<span class="sd">            Font size, default is 12.</span>
-<span class="sd">        s : float</span>
-<span class="sd">            Point size for 2D plot, default is 4.0.</span>
+<span class="sd">            Font size, default is 12 (1D only).</span>
 <span class="sd">        cmap : str</span>
-<span class="sd">            Colormap name for 2D plot, default is &#39;jet&#39;.</span>
+<span class="sd">            Colormap name for 2D plot, default is &#39;viridis&#39;.</span>
 <span class="sd">        legend : bool</span>
 <span class="sd">            If show legend or not for 1D plot, default is False.</span>
 <span class="sd">        ds : str</span>
@@ -346,32 +369,81 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        o : Axes</span>
+<span class="sd">        r : Axes, List[Axes]</span>
+<span class="sd">            Axes for 1D, and (ax_image, ax_xprofile, ax_yprofile) for 2D spectrum.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
         <span class="n">figsize</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;figsize&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
         <span class="n">fontsize</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;fontsize&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+        <span class="n">xlim</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;xlim&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">ylim</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;ylim&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="o">==</span> <span class="s1">&#39;2D&#39;</span><span class="p">:</span>
-            <span class="n">xcol</span><span class="p">,</span> <span class="n">ycol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">xcol</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">ycol</span><span class="p">,</span>
-                                     <span class="n">c</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;cmap&#39;</span><span class="p">,</span> <span class="s1">&#39;jet&#39;</span><span class="p">),</span>
-                                     <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xcol</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ycol</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">r</span>
+            <span class="n">_</span><span class="p">,</span> <span class="p">(</span><span class="n">ax_im</span><span class="p">,</span> <span class="n">ax_xprof</span><span class="p">,</span>
+                <span class="n">ax_yprof</span><span class="p">)</span> <span class="o">=</span> <span class="n">plot_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                       <span class="n">show_profile</span><span class="p">,</span>
+                                       <span class="n">show_colorbar</span><span class="p">,</span>
+                                       <span class="n">show_grid</span><span class="p">,</span>
+                                       <span class="n">fillna</span><span class="p">,</span>
+                                       <span class="n">mapped</span><span class="p">,</span>
+                                       <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+                                       <span class="n">cmap</span><span class="o">=</span><span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;cmap&#39;</span><span class="p">,</span> <span class="s1">&#39;viridis&#39;</span><span class="p">),</span>
+                                       <span class="n">clim</span><span class="o">=</span><span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;clim&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                                       <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
+            <span class="n">ax_im</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xlim</span><span class="p">)</span>
+            <span class="n">ax_im</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ylim</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">ax_im</span><span class="p">,</span> <span class="n">ax_xprof</span><span class="p">,</span> <span class="n">ax_yprof</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="o">==</span> <span class="s1">&#39;1D&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
             <span class="n">xcol</span><span class="p">,</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">xcol</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
-                                     <span class="n">legend</span><span class="o">=</span><span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;legend&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;line&#39;</span><span class="p">,</span>
+                                     <span class="n">x</span><span class="o">=</span><span class="n">xcol</span><span class="p">,</span>
+                                     <span class="n">y</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span>
+                                     <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                                     <span class="n">grid</span><span class="o">=</span><span class="n">show_grid</span><span class="p">,</span>
+                                     <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+                                     <span class="n">legend</span><span class="o">=</span><span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;legend&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+                                     <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xlim</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ylim</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xcol</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Count&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_drawstyle</span><span class="p">(</span><span class="n">kws</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ds&#39;</span><span class="p">,</span> <span class="s1">&#39;steps&#39;</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">r</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span></div></div>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Spectrum.stats"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.stats">[docs]</a>    <span class="k">def</span> <span class="nf">stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapped</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the statistical info.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        r : dict</span>
+<span class="sd">            Keys: &#39;sum&#39;, &#39;mean&#39;, &#39;std&#39;, &#39;fwhm&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">mapped</span><span class="p">)</span>
+        <span class="n">_cnt</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+        <span class="c1"># sum, ratio, avg_x, avg_y, std_x, std_y, fwhm_x, fwhm_y</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;All&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">_cnt</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="mf">1.0</span><span class="p">]}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="o">==</span> <span class="s1">&#39;2D&#39;</span><span class="p">:</span>
+            <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+            <span class="n">p1_stat</span> <span class="o">=</span> <span class="n">weighted_stats</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">p1</span><span class="p">],</span> <span class="n">_cnt</span><span class="p">)</span>
+            <span class="n">p2_stat</span> <span class="o">=</span> <span class="n">weighted_stats</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">p2</span><span class="p">],</span> <span class="n">_cnt</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;All&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+                <span class="n">p1_stat</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">],</span> <span class="n">p2_stat</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">],</span>
+                <span class="n">p1_stat</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">],</span> <span class="n">p2_stat</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">],</span>
+                <span class="n">p1_stat</span><span class="p">[</span><span class="s1">&#39;fwhm&#39;</span><span class="p">],</span> <span class="n">p2_stat</span><span class="p">[</span><span class="s1">&#39;fwhm&#39;</span><span class="p">],</span>
+            <span class="p">])</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Sum&#39;</span><span class="p">,</span> <span class="s1">&#39;Ratio&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;x&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;y&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;σx&#39;</span><span class="p">,</span> <span class="s1">&#39;σy&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;FWHMx&#39;</span><span class="p">,</span> <span class="s1">&#39;FWHMy&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="o">==</span> <span class="s1">&#39;1D&#39;</span><span class="p">:</span>
+            <span class="n">p1</span><span class="p">,</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+            <span class="n">p1_stat</span> <span class="o">=</span> <span class="n">weighted_stats</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">p1</span><span class="p">],</span> <span class="n">_cnt</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;All&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+                <span class="n">p1_stat</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">],</span> <span class="n">p1_stat</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">],</span> <span class="n">p1_stat</span><span class="p">[</span><span class="s1">&#39;fwhm&#39;</span><span class="p">]</span>
+            <span class="p">])</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Sum&#39;</span><span class="p">,</span> <span class="s1">&#39;Ratio&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;x&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;σx&#39;</span><span class="p">,</span> <span class="s1">&#39;FWHM&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span></div></div>
 
 
 <span class="k">def</span> <span class="nf">_map_fn</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">ch</span><span class="p">):</span>
