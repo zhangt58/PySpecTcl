@@ -3,6 +3,7 @@
 import toml
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import pathlib
 from functools import partial
 from requests.adapters import HTTPAdapter
@@ -340,6 +341,38 @@ class Spectrum(object):
             return r
         else:
             return None
+
+    def stats(self, mapped=True):
+        """Get the statistical info.
+
+        Returns
+        -------
+        r : dict
+            Keys: 'sum', 'mean', 'std', 'fwhm'.
+        """
+        df = self.get_data(mapped)
+        _cnt = df['count']
+        # sum, ratio, avg_x, avg_y, std_x, std_y, fwhm_x, fwhm_y
+        data = {'All': [_cnt.sum(), 1.0]}
+        if self.stype == '2D':
+            p1, p2 = self.parameters
+            p1_stat = weighted_stats(df[p1], _cnt)
+            p2_stat = weighted_stats(df[p2], _cnt)
+            data['All'].extend([
+                p1_stat['mean'], p2_stat['mean'],
+                p1_stat['std'], p2_stat['std'],
+                p1_stat['fwhm'], p2_stat['fwhm'],
+            ])
+            columns=['Sum', 'Ratio', '<x>', '<y>', 'σx', 'σy',
+                     'FWHMx', 'FWHMy']
+        elif self.stype == '1D':
+            p1, = self.parameters
+            p1_stat = weighted_stats(df[p1], _cnt)
+            data['All'].extend([
+                p1_stat['mean'], p1_stat['std'], p1_stat['fwhm']
+            ])
+            columns=['Sum', 'Ratio', '<x>', 'σx', 'FWHM']
+        return pd.DataFrame.from_dict(data, orient='index', columns=columns)
 
 
 def _map_fn(low, high, bins, ch):
