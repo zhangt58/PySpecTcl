@@ -38,6 +38,7 @@ def get_axes_grid(nrows, ncols, w, h, **kws):
 def plot_image(sp,
                show_profile=True,
                show_colorbar=True,
+               show_grid=True,
                fillna=False,
                mapped=True,
                **kws):
@@ -51,6 +52,8 @@ def plot_image(sp,
         If show colorbar or not.
     show_profile : bool
         If show x,y profile or not.
+    show_grid : bool
+        If show grid on x,y profile plot or not.
     fillna : bool
         If fill empty count as nan, otherwise fill with zero.
     mapped : bool
@@ -142,8 +145,7 @@ def plot_image(sp,
                            legend=False,
                            ds='steps',
                            c='b',
-                           xlim=[xmin, xmax],
-                           xlabel=xlbl)
+                           xlim=[xmin, xmax])
         yline = yprof.plot(x='count',
                            y='y',
                            ax=ax_yprof,
@@ -166,7 +168,7 @@ def plot_image(sp,
     ax_xprof.yaxis.set_ticks_position("right")
     ax_yprof.xaxis.set_ticks_position("top")
     ax_yprof.set_xlabel('')
-    ax_yprof.annotate("count", (0.82, 0.165),
+    ax_yprof.annotate("count", (0.84, 0.165),
                       fontsize=10,
                       xycoords='figure fraction',
                       bbox={
@@ -177,12 +179,16 @@ def plot_image(sp,
                           'alpha': 0.8
                       })
 
+    # set xlabel
+    ax_xprof.set_xlabel(xlbl, fontname='monospace')
+
     # set ylabel
-    ax_im.set_ylabel(ylbl)
+    ax_im.set_ylabel(ylbl, fontname='monospace')
 
     # set title
-    ax_im.annotate(sp.name, (0.01, 0.95),
+    ax_im.annotate(sp.name, (ax_im.get_position().x0, 0.95),
                    fontsize=14,
+                   fontname='monospace',
                    xycoords='figure fraction',
                    bbox={
                        'boxstyle': 'round,pad=0.25',
@@ -191,5 +197,14 @@ def plot_image(sp,
                        'lw': 0.5,
                        'alpha': 0.8
                    })
+    # ticklabel fontname
+    [
+        l.set_fontna11me('monospace') for l in ax_im.yaxis.get_ticklabels() +
+        ax_xprof.xaxis.get_ticklabels() + ax_xprof.yaxis.get_ticklabels() +
+        ax_yprof.xaxis.get_ticklabels()
+    ]
+    # grid?
+    if show_grid:
+        [o.grid(color='0.8', ls='--', lw=0.8) for o in (ax_xprof, ax_yprof)]
     #
     return fig, (ax_im, ax_xprof, ax_yprof)
