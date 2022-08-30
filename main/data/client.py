@@ -361,6 +361,9 @@ class SpecTclClient(object):
                 gate_apply_data = self._apply_client.list()
                 r['Gate'] = r.apply(lambda i: gate_apply_data.loc[i.name].desc, axis=1)
                 r.drop(columns=['gate'], inplace=True)
+            elif group == 'gate':
+                # remove gates with not-defined Parameters
+                r.drop(r[r['Parameters'].isna()].index, inplace=True)
             return r
 
     def get_spectrum(self, name, **kws):
