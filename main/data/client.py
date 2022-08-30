@@ -326,6 +326,8 @@ class SpecTclClient(object):
                 'gate': self._gate_client,
                 'apply': self._apply_client
         }
+        # initialize gate table.
+        self._df_gate = self.list('gate')
 
     @property
     def port(self):
@@ -361,9 +363,21 @@ class SpecTclClient(object):
                 gate_apply_data = self._apply_client.list()
                 r['Gate'] = r.apply(lambda i: gate_apply_data.loc[i.name].desc, axis=1)
                 r.drop(columns=['gate'], inplace=True)
+                # append a column '_gate_viz': the name of gate which matches the Parameters, which is for drawing gate
+                # with the spectrum.                
+                r['_params_str'] = r.apply(lambda row: str(row.Parameters), axis=1)
+                self._df_gate['_params_str'] = self._df_gate.apply(lambda row: str(row.Parameters), axis=1)
+                _df_gate1 = self._df_gate.reset_index().set_index('_params_str')
+                _df_sp1 = r.reset_index().set_index('_params_str')
+                _idx = _df_sp1.index.intersection(_df_gate1)
+                _df_sp = _df_gate1.loc[_idx]['Name'].to_frame().rename(columns={'Name': '_gate_viz'})\
+                                    .join(_df_sp1.loc[_idx]).set_index('Name')
+                r['_gate_viz'] = _df_sp['_gate_viz']
+                # r.drop(columns=['_params_str'])
             elif group == 'gate':
                 # remove gates with not-defined Parameters
                 r.drop(r[r['Parameters'].isna()].index, inplace=True)
+                self._df_gate = r
             return r
 
     def get_spectrum(self, name, **kws):
