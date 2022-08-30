@@ -112,7 +112,8 @@ def plot_image(sp,
     im = ax_im.imshow(c_arr,
                       cmap=kws.pop('cmap', 'jet'),
                       origin='lower',
-                      aspect=kws.get('aspect', 'auto'))
+                      aspect=kws.get('aspect', 'auto'),
+                      interpolation=kws.get('interpolation', 'none'))
 
     # colorbar
     if show_colorbar:
@@ -199,7 +200,7 @@ def plot_image(sp,
                    })
     # ticklabel fontname
     [
-        l.set_fontna11me('monospace') for l in ax_im.yaxis.get_ticklabels() +
+        l.set_fontname('monospace') for l in ax_im.yaxis.get_ticklabels() +
         ax_xprof.xaxis.get_ticklabels() + ax_xprof.yaxis.get_ticklabels() +
         ax_yprof.xaxis.get_ticklabels()
     ]
