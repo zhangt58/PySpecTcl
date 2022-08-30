@@ -360,6 +360,7 @@ class SpecTclClient(object):
                 # append gated column
                 gate_apply_data = self._apply_client.list()
                 r['Gate'] = r.apply(lambda i: gate_apply_data.loc[i.name].desc, axis=1)
+                r.drop(columns=['gate'], inplace=True)
             return r
 
     def get_spectrum(self, name, **kws):
