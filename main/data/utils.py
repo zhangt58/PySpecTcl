@@ -254,6 +254,7 @@ class Spectrum(object):
              ax=None,
              show_colorbar=True,
              show_profile=True,
+             show_grid=True,
              fillna=True,
              mapped=True,
              **kws):
@@ -267,6 +268,8 @@ class Spectrum(object):
             If show colorbar or not.
         show_profile : bool
             If show x,y profile or not.
+        show_grid : bool
+            If show grid on x,y profile plots (1D plot) or not.
         fillna : bool
             If fill empty count as nan, otherwise fill with zero.
         mapped : bool
@@ -274,6 +277,10 @@ class Spectrum(object):
 
         Keyword Arguments
         -----------------
+        xlim : tuple
+            Limit range along x axis.
+        ylim : tuple
+            Limit range along y axis.
         figsize : tuple
             Tuple of figure width and height, default is (10, 8).
         fontsize : int
@@ -293,16 +300,21 @@ class Spectrum(object):
         """
         figsize = kws.pop('figsize', (10, 8))
         fontsize = kws.pop('fontsize', 12)
+        xlim = kws.pop('xlim', None)
+        ylim = kws.pop('ylim', None)
         if self.stype == '2D':
             _, (ax_im, ax_xprof,
                 ax_yprof) = plot_image(self,
                                        show_profile,
                                        show_colorbar,
+                                       show_grid,
                                        fillna,
                                        mapped,
                                        figsize=figsize,
                                        cmap=kws.pop('cmap', 'viridis'),
                                        **kws)
+            ax_im.set_xlim(xlim)
+            ax_im.set_ylim(ylim)
             return (ax_im, ax_xprof, ax_yprof)
         elif self.stype == '1D':
             if ax is None:
@@ -312,9 +324,12 @@ class Spectrum(object):
                                      x=xcol,
                                      y='count',
                                      ax=ax,
+                                     grid=show_grid,
                                      figsize=figsize,
                                      legend=kws.pop('legend', False),
                                      **kws)
+            ax.set_xlim(xlim)
+            ax.set_ylim(ylim)
             ax.set_xlabel(xcol, fontsize=fontsize)
             ax.set_ylabel('Count', fontsize=fontsize)
             ax.set_title(self.name, fontsize=fontsize + 2)
