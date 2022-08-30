@@ -326,8 +326,6 @@ class SpecTclClient(object):
                 'gate': self._gate_client,
                 'apply': self._apply_client
         }
-        # initialize gate table.
-        self._df_gate = self.list('gate')
 
     @property
     def port(self):
@@ -353,6 +351,20 @@ class SpecTclClient(object):
         return f"[SpecTcl Client] to {self.base_url}:{self.port}/{self.name}"
 
     def list(self, group, **kws):
+        """List resources as a table.
+
+        Parameters
+        ----------
+        group : str
+            spectrum, gate.
+        
+        Keyword Arguments
+        -----------------
+        filter : str
+            Search pattern.
+        clean : str
+            Only work with group of 'gate'.
+        """
         if group not in VALID_GROUP_LIST:
             print(f"'{group}' is not one of the supported: {VALID_GROUP_LIST}.")
             return None
@@ -365,19 +377,22 @@ class SpecTclClient(object):
                 r.drop(columns=['gate'], inplace=True)
                 # append a column '_gate_viz': the name of gate which matches the Parameters, which is for drawing gate
                 # with the spectrum.                
-                r['_params_str'] = r.apply(lambda row: str(row.Parameters), axis=1)
-                self._df_gate['_params_str'] = self._df_gate.apply(lambda row: str(row.Parameters), axis=1)
-                _df_gate1 = self._df_gate.reset_index().set_index('_params_str')
+                _df_gate = self.list('gate')
+                r['_params_str'] = r.apply(lambda i: str(i.Parameters), axis=1)
+                _df_gate['_params_str'] = _df_gate.apply(lambda i: str(i.Parameters), axis=1)
+                _df_gate1 = _df_gate.reset_index().set_index('_params_str')
                 _df_sp1 = r.reset_index().set_index('_params_str')
-                _idx = _df_sp1.index.intersection(_df_gate1)
-                _df_sp = _df_gate1.loc[_idx]['Name'].to_frame().rename(columns={'Name': '_gate_viz'})\
-                                    .join(_df_sp1.loc[_idx]).set_index('Name')
-                r['_gate_viz'] = _df_sp['_gate_viz']
-                # r.drop(columns=['_params_str'])
+                _idx = _df_sp1.index.intersection(_df_gate1.index)
+                _df_sp = _df_gate1.loc[_idx]['Name'].to_frame().rename(columns={'Name': 'ShowGate'}).join(_df_sp1.loc[_idx]).set_index('Name')
+                r['ShowGate'] = _df_sp['ShowGate']
+                r.drop(columns=['_params_str'], inplace=True)
             elif group == 'gate':
-                # remove gates with not-defined Parameters
-                r.drop(r[r['Parameters'].isna()].index, inplace=True)
-                self._df_gate = r
+                # remove gates with not-defined Parameters, but keep the ones with defined Gates
+                if kws.get('clean', True):
+                    r.drop(
+                        r[r.Parameters.isna() & r.Gates.isna()].index,
+                        inplace=True)
+                #r.drop(r[r['Parameters'].isna()].index, inplace=True)
             return r
 
     def get_spectrum(self, name, **kws):
