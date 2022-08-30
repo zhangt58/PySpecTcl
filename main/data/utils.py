@@ -356,15 +356,15 @@ class Spectrum(object):
         data = {'All': [_cnt.sum(), 1.0]}
         if self.stype == '2D':
             p1, p2 = self.parameters
-            p1_stat = weighted_stats(df[p1], _cnt)
-            p2_stat = weighted_stats(df[p2], _cnt)
+            _stat = weighted_stats(df[p1], _cnt, df[p2])
             data['All'].extend([
-                p1_stat['mean'], p2_stat['mean'],
-                p1_stat['std'], p2_stat['std'],
-                p1_stat['fwhm'], p2_stat['fwhm'],
+                *_stat['mean'],
+                *_stat['std'],
+                *_stat['fwhm'],
+                _stat['rho'],
             ])
             columns=['Sum', 'Ratio', '<x>', '<y>', 'σx', 'σy',
-                     'FWHMx', 'FWHMy']
+                     'FWHMx', 'FWHMy', 'ρ']
         elif self.stype == '1D':
             p1, = self.parameters
             p1_stat = weighted_stats(df[p1], _cnt)
