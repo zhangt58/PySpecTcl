@@ -6,11 +6,11 @@ from simplejson import JSONDecodeError
 
 from .utils import ACTION_PARAMS
 from .utils import make_response
-from .utils import Spectrum
 from .utils import GATE_NAME_MAP
 from .utils import GATE_TYPE_MAP
 from .utils import SPEC_NAME_MAP
 from .utils import GATE_APPLY_MAP
+from .spectrum import Spectrum
 
 DEFAULT_APP_NAME = 'spectcl'
 DEFAULT_BASE_URL = 'http://127.0.0.1'

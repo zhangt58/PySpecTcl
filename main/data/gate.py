@@ -3,7 +3,7 @@
 import pandas as pd
 from matplotlib.patches import Polygon
 
-from .misc import is_nan
+from .utils import is_nan
 
 
 class Gate:
