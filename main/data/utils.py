@@ -229,9 +229,6 @@ class Spectrum(object):
         self._data.rename(columns={'v': 'count'}, inplace=True)
         self._data.index.name = 'id'
 
-    def del_gate(self):
-        pass
-
     def set_gate(self, gate: str):
         """Set/update with *gate*.
         """
@@ -250,7 +247,7 @@ class Spectrum(object):
             return None
         return Gate(self.client._gate_client.list().loc[applied_gate])
 
-    gate = property(get_gate, set_gate, del_gate, "Gate")
+    gate = property(get_gate, set_gate, "Gate")
 
     def plot(self,
              ax=None,
