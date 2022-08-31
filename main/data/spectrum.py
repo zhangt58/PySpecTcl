@@ -9,6 +9,7 @@ from .stats import weighted_stats
 from .plot import plot_image
 from ..contrib.data import to_image_tuple
 from .utils import STYPE_MAP, DTYPE_MAP
+from .utils import is_nan
 
 
 class Spectrum(object):
@@ -44,7 +45,24 @@ class Spectrum(object):
         # client
         self.client = kws.get('client', None)
         # set up gate and showgate
-        
+        self._set_gate(conf.Gate, conf.ShowGate)
+
+    def _set_gate(self, applied_gate: str, show_gate: str):
+        """Integrate gate info.
+        """
+        # applied gate
+        if applied_gate == 'ungated':
+            self._gate = None
+        else:
+            self._gate = Gate(
+                self.client._gate_client.list().loc[applied_gate])
+
+        # show gate: the related gate, but not being applied.
+        if is_nan(show_gate):
+            self._show_gate = None
+        else:
+            self._show_gate = Gate(
+                self.client._gate_client.list().loc[show_gate])
 
     @property
     def name(self):
@@ -198,25 +216,30 @@ class Spectrum(object):
         self._data.rename(columns={'v': 'count'}, inplace=True)
         self._data.index.name = 'id'
 
-    def set_gate(self, gate: str):
-        """Set/update with *gate*.
+    @property
+    def gate(self):
+        """Gate: Return the applied gate.
+        """
+        return self._gate
+
+    @gate.setter
+    def gate(self, gate: Gate):
+        """Applied the gate.
         """
         if self.client is None:
             print(f"Cannot apply '{gate}'")
-            return None
-        self.client._apply_client.apply(self.name, gate)
+        self.client._apply_client.apply(self.name, gate.name)
 
-    def get_gate(self):
-        """Return applied Gate.
+    @property
+    def show_gate(self):
+        """Gate: Return the related gate for plotting only.
         """
-        if self.client is None:
-            return None
-        applied_gate = self.client._apply_client.list().loc[self._name].gate
-        if applied_gate == '-TRUE-':
-            return None
-        return Gate(self.client._gate_client.list().loc[applied_gate])
+        return self._show_gate
 
-    gate = property(get_gate, set_gate, "Gate")
+    def is_gated(self):
+        """Return if the spectrum is applied with any gates.
+        """
+        return self._gate is not None
 
     def plot(self,
              ax=None,
@@ -332,18 +355,17 @@ class Spectrum(object):
                 *_stat['fwhm'],
                 _stat['rho'],
             ])
-            columns=['Sum', 'Ratio', '<x>', '<y>', 'σx', 'σy',
-                     'FWHMx', 'FWHMy', 'ρ']
+            columns = [
+                'Sum', 'Ratio', '<x>', '<y>', 'σx', 'σy', 'FWHMx', 'FWHMy', 'ρ'
+            ]
         elif self.stype == '1D':
             p1, = self.parameters
             p1_stat = weighted_stats(df[p1], _cnt)
-            data['All'].extend([
-                p1_stat['mean'], p1_stat['std'], p1_stat['fwhm']
-            ])
-            columns=['Sum', 'Ratio', '<x>', 'σx', 'FWHM']
+            data['All'].extend(
+                [p1_stat['mean'], p1_stat['std'], p1_stat['fwhm']])
+            columns = ['Sum', 'Ratio', '<x>', 'σx', 'FWHM']
         return pd.DataFrame.from_dict(data, orient='index', columns=columns)
 
 
 def _map_fn(low, high, bins, ch):
     return low + ch * (high - low) / bins
-
