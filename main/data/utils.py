@@ -10,6 +10,7 @@ from requests.adapters import HTTPAdapter
 from spectcl.contrib import to_image_tuple
 from .stats import weighted_stats
 from .plot import plot_image
+from .gate import Gate
 
 CDIR_PATH = pathlib.Path(__file__).parent
 
@@ -240,14 +241,14 @@ class Spectrum(object):
         self.client._apply_client.apply(self.name, gate)
 
     def get_gate(self):
-        """Return applied gate.
+        """Return applied Gate.
         """
         if self.client is None:
             return None
         applied_gate = self.client._apply_client.list().loc[self._name].gate
         if applied_gate == '-TRUE-':
             return None
-        return self.client._gate_client.list().loc[applied_gate]
+        return Gate(self.client._gate_client.list().loc[applied_gate])
 
     gate = property(get_gate, set_gate, del_gate, "Gate")
 
