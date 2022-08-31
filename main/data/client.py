@@ -365,6 +365,7 @@ class SpecTclClient(object):
         clean : str
             Only work with group of 'gate'.
         """
+        clean_gate = kws.pop('clean', True)
         if group not in VALID_GROUP_LIST:
             print(f"'{group}' is not one of the supported: {VALID_GROUP_LIST}.")
             return None
@@ -388,7 +389,7 @@ class SpecTclClient(object):
                 r.drop(columns=['_params_str'], inplace=True)
             elif group == 'gate':
                 # remove gates with not-defined Parameters, but keep the ones with defined Gates
-                if kws.get('clean', True):
+                if clean_gate:
                     r.drop(
                         r[r.Parameters.isna() & r.Gates.isna()].index,
                         inplace=True)
