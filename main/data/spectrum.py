@@ -248,6 +248,7 @@ class Spectrum(object):
              show_grid=True,
              fillna=True,
              mapped=True,
+             draw_gate_dict={},
              **kws):
         """Plot spectrum data.
 
@@ -265,6 +266,8 @@ class Spectrum(object):
             If fill empty count as nan, otherwise fill with zero.
         mapped : bool
             If show data in mapped coordinate (world), otherwise show in channel coordinate.
+        draw_gate_dict : dict
+            A dict of keyword arguments for drawing gate.
 
         Keyword Arguments
         -----------------
@@ -310,7 +313,8 @@ class Spectrum(object):
             ax_im.set_xlim(xlim)
             ax_im.set_ylim(ylim)
             # draw with ShowGate
-
+            if self.show_gate is not None:
+                self.show_gate.draw(ax_im, **draw_gate_dict)
             return (ax_im, ax_xprof, ax_yprof)
         elif self.stype == '1D':
             if ax is None:
