@@ -326,8 +326,6 @@ class SpecTclClient(object):
                 'gate': self._gate_client,
                 'apply': self._apply_client
         }
-        # sp df cache
-        self._sp_cache = None
 
     @property
     def port(self):
@@ -366,17 +364,12 @@ class SpecTclClient(object):
             Search pattern.
         clean : str
             Only work with group of 'gate', default is True.
-        refresh_cache : bool
-            If refresh cache or not, default is True.
         """
         clean_gate = kws.pop('clean', True)
-        refresh_cache = kws.pop('refresh_cache', True)
         if group not in VALID_GROUP_LIST:
             print(f"'{group}' is not one of the supported: {VALID_GROUP_LIST}.")
             return None
         else:
-            if self._sp_cache is not None and not refresh_cache:
-                return self._sp_cache
             r = self.__list_map.get(group).list(**kws)
             if group == 'spectrum':
                 # append gated column
@@ -394,7 +387,6 @@ class SpecTclClient(object):
                 _df_sp = _df_gate1.loc[_idx]['Name'].to_frame().rename(columns={'Name': 'ShowGate'}).join(_df_sp1.loc[_idx]).set_index('Name')
                 r['ShowGate'] = _df_sp['ShowGate']
                 r.drop(columns=['_params_str'], inplace=True)
-                self._sp_cache = r
                 return r
             elif group == 'gate':
                 # remove gates with not-defined Parameters, but keep the ones with defined Gates
@@ -424,11 +416,10 @@ class SpecTclClient(object):
             Spectrum instance.
         """
         kws.pop('as_raw', None)
-
         refresh_cache = kws.pop('refresh_cache', False)
         for c in (self._data_client, self._gate_client, self._apply_client):
             c.list(refresh_cache=refresh_cache)
-        _spectrum_df = self.list('spectrum', refresh_cache=refresh_cache)
+        _spectrum_df = self.list('spectrum')
         data = self._data_client.contents(name, as_raw=True, **kws)
         conf = _spectrum_df.loc[name]
         return Spectrum(name, conf, data, client=self)
