@@ -32,7 +32,7 @@ def set_entry_points():
 
 setup(
     name='pyspectcl',
-    version='0.4.0',
+    version='0.4.1',
     description='Python interface to SpecTcl server',
     long_description=readme(),
     long_description_content_type='text/markdown',
