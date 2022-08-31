@@ -172,9 +172,9 @@ def plot_image(sp,
     ax_xprof.yaxis.set_ticks_position("right")
     ax_yprof.xaxis.set_ticks_position("top")
     ax_yprof.set_xlabel('')
-    ax_yprof.annotate("count", (0.84, 0.165),
+    ax_yprof.annotate("count", (0.6, -0.1), ha='center',
                       fontsize=10,
-                      xycoords='figure fraction',
+                      xycoords='axes fraction',
                       bbox={
                           'boxstyle': 'round,pad=0.25',
                           'fc': '0.8',
@@ -190,10 +190,10 @@ def plot_image(sp,
     ax_im.set_ylabel(ylbl, fontname='monospace')
 
     # set title
-    ax_im.annotate(sp.name, (ax_im.get_position().x0, 0.95),
+    ax_im.annotate(sp.name, (0.5, 1.115), ha='center',
                    fontsize=14,
                    fontname='monospace',
-                   xycoords='figure fraction',
+                   xycoords='axes fraction',
                    bbox={
                        'boxstyle': 'round,pad=0.25',
                        'fc': '0.85',
