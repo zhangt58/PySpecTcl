@@ -343,13 +343,16 @@ class Spectrum(object):
 
         Returns
         -------
-        r : dict
-            Keys: 'sum', 'mean', 'std', 'fwhm'.
+        r : pd.DataFrame
+            columns (1D): 'Sum', 'Ratio', '<x>', 'σx', 'FWHM';         
+            columns (2D): 'Sum', 'Ratio', '<x>', '<y>', 'σx', 'σy', 'FWHMx', 'FWHMy', 'ρ';
+            index: 'All', gate names, etc.
         """
         df = self.get_data(mapped)
         _cnt = df['count']
+        _cnt_sum = _cnt.sum()
         # sum, ratio, avg_x, avg_y, std_x, std_y, fwhm_x, fwhm_y
-        data = {'All': [_cnt.sum(), 1.0]}
+        data = {'All': [_cnt_sum, 1.0]}
         if self.stype == '2D':
             p1, p2 = self.parameters
             _stat = weighted_stats(df[p1], _cnt, df[p2])
@@ -359,6 +362,22 @@ class Spectrum(object):
                 *_stat['fwhm'],
                 _stat['rho'],
             ])
+
+            # Add rows for gate
+            if self.show_gate is not None:
+                if self.show_gate.type == 'Contour':
+                    df_in = df[self.show_gate.is_in(df.iloc[:, :2])]
+                    _cnt1 = df_in['count']
+                    _cnt1_sum = _cnt1.sum()
+                    _stat1 = weighted_stats(df_in[p1], _cnt1, df_in[p2])
+                    data[self.show_gate.name] = [
+                        _cnt1_sum, _cnt1_sum / _cnt_sum,
+                        *_stat1['mean'],
+                        *_stat1['std'],
+                        *_stat1['fwhm'],
+                        _stat1['rho'],
+                    ]
+            # column names
             columns = [
                 'Sum', 'Ratio', '<x>', '<y>', 'σx', 'σy', 'FWHMx', 'FWHMy', 'ρ'
             ]
@@ -368,6 +387,8 @@ class Spectrum(object):
             data['All'].extend(
                 [p1_stat['mean'], p1_stat['std'], p1_stat['fwhm']])
             columns = ['Sum', 'Ratio', '<x>', 'σx', 'FWHM']
+            
+        #
         return pd.DataFrame.from_dict(data, orient='index', columns=columns)
 
 

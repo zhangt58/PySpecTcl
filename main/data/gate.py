@@ -33,6 +33,21 @@ class Gate:
             return f"Gate '{self.name}': '{self.type}' on gates {self.gates}"
     __repr__ = __str__
 
+    def is_in(self, points):
+        """Test if the (x, y) points in the boundary defined by the contour gate.
+
+        Parameters
+        ----------
+        points : array:
+            N x 2 array of (x, y) points.
+        """
+        if self.type == 'Contour':
+            pts = [list(p.values()) for p in self.points]
+            polygon1 = Polygon(pts)
+            return polygon1.contains_points(points)
+        else:
+            raise NotImplementedError
+
     def draw(self, ax, color='r', **kws):
         """Draw the gate onto *ax*.
 
