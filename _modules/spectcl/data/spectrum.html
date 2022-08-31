@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spectcl.data.utils &mdash; PySpecTcl 0.3.3 documentation</title>
+  <title>spectcl.data.spectrum &mdash; PySpecTcl 0.4.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -59,7 +59,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>spectcl.data.utils</li>
+      <li>spectcl.data.spectrum</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -68,50 +68,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for spectcl.data.utils</h1><div class="highlight"><pre>
+  <h1>Source code for spectcl.data.spectrum</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-
-<span class="kn">import</span> <span class="nn">toml</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">requests.adapters</span> <span class="kn">import</span> <span class="n">HTTPAdapter</span>
-<span class="kn">from</span> <span class="nn">spectcl.contrib</span> <span class="kn">import</span> <span class="n">to_image_tuple</span>
+
+<span class="kn">from</span> <span class="nn">.gate</span> <span class="kn">import</span> <span class="n">Gate</span>
 <span class="kn">from</span> <span class="nn">.stats</span> <span class="kn">import</span> <span class="n">weighted_stats</span>
 <span class="kn">from</span> <span class="nn">.plot</span> <span class="kn">import</span> <span class="n">plot_image</span>
-
-<span class="n">CDIR_PATH</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
-
-<span class="n">DTYPE_MAP</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;short&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">),</span>  <span class="c1"># int8</span>
-    <span class="s1">&#39;word&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;i2&#39;</span><span class="p">),</span>  <span class="c1"># int16</span>
-    <span class="s1">&#39;long&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;i4&#39;</span><span class="p">),</span>  <span class="c1"># int32</span>
-<span class="p">}</span>
-<span class="n">STYPE_MAP</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="s1">&#39;1D&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="s1">&#39;2D&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span>
-<span class="p">}</span>
-
-
-<span class="k">class</span> <span class="nc">MyAdapter</span><span class="p">(</span><span class="n">HTTPAdapter</span><span class="p">):</span>
-    <span class="k">pass</span>
-    <span class="c1"># def init_poolmanager(self, connections, maxsize, block=False, **kws):</span>
-    <span class="c1">#    self.pool</span>
-
-
-<span class="k">def</span> <span class="nf">make_response</span><span class="p">(</span><span class="n">r</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">ok</span> <span class="ow">and</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;OK&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s1">&#39;detail&#39;</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">NotFoundSpecTclDataError</span>
-
-
-<span class="k">class</span> <span class="nc">NotFoundSpecTclDataError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">..contrib.data</span> <span class="kn">import</span> <span class="n">to_image_tuple</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">STYPE_MAP</span><span class="p">,</span> <span class="n">DTYPE_MAP</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">is_nan</span>
 
 
 <div class="viewcode-block" id="Spectrum"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum">[docs]</a><span class="k">class</span> <span class="nc">Spectrum</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -146,6 +115,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">map_data</span><span class="p">()</span>
         <span class="c1"># client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;client&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># set up gate and showgate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_gate</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">Gate</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">ShowGate</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applied_gate</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">show_gate</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Integrate gate info.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># applied gate</span>
+        <span class="k">if</span> <span class="n">applied_gate</span> <span class="o">==</span> <span class="s1">&#39;ungated&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gate</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gate</span> <span class="o">=</span> <span class="n">Gate</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_gate_client</span><span class="o">.</span><span class="n">list</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">applied_gate</span><span class="p">])</span>
+
+        <span class="c1"># show gate: the related gate, but not being applied.</span>
+        <span class="k">if</span> <span class="n">is_nan</span><span class="p">(</span><span class="n">show_gate</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_show_gate</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_show_gate</span> <span class="o">=</span> <span class="n">Gate</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_gate_client</span><span class="o">.</span><span class="n">list</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">show_gate</span><span class="p">])</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -299,28 +287,30 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;count&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;id&#39;</span></div>
 
-<div class="viewcode-block" id="Spectrum.del_gate"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.del_gate">[docs]</a>    <span class="k">def</span> <span class="nf">del_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span></div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gate: Return the applied gate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gate</span>
 
-<div class="viewcode-block" id="Spectrum.set_gate"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.set_gate">[docs]</a>    <span class="k">def</span> <span class="nf">set_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gate</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set/update with *gate*.</span>
+    <span class="nd">@gate</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gate</span><span class="p">:</span> <span class="n">Gate</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Applied the gate.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot apply &#39;</span><span class="si">{</span><span class="n">gate</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_apply_client</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">gate</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_apply_client</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">gate</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Spectrum.get_gate"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.get_gate">[docs]</a>    <span class="k">def</span> <span class="nf">get_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return applied gate.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">show_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gate: Return the related gate for plotting only.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="n">applied_gate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_apply_client</span><span class="o">.</span><span class="n">list</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">]</span><span class="o">.</span><span class="n">gate</span>
-        <span class="k">if</span> <span class="n">applied_gate</span> <span class="o">==</span> <span class="s1">&#39;-TRUE-&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_gate_client</span><span class="o">.</span><span class="n">list</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">applied_gate</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_show_gate</span>
 
-    <span class="n">gate</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_gate</span><span class="p">,</span> <span class="n">set_gate</span><span class="p">,</span> <span class="n">del_gate</span><span class="p">,</span> <span class="s2">&quot;Gate&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="Spectrum.is_gated"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.is_gated">[docs]</a>    <span class="k">def</span> <span class="nf">is_gated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return if the spectrum is applied with any gates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="Spectrum.plot"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
              <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -329,6 +319,7 @@
              <span class="n">show_grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
              <span class="n">fillna</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
              <span class="n">mapped</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+             <span class="n">draw_gate_dict</span><span class="o">=</span><span class="p">{},</span>
              <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Plot spectrum data.</span>
 
@@ -346,6 +337,8 @@
 <span class="sd">            If fill empty count as nan, otherwise fill with zero.</span>
 <span class="sd">        mapped : bool</span>
 <span class="sd">            If show data in mapped coordinate (world), otherwise show in channel coordinate.</span>
+<span class="sd">        draw_gate_dict : dict</span>
+<span class="sd">            A dict of keyword arguments for drawing gate.</span>
 
 <span class="sd">        Keyword Arguments</span>
 <span class="sd">        -----------------</span>
@@ -390,6 +383,9 @@
                                        <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
             <span class="n">ax_im</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xlim</span><span class="p">)</span>
             <span class="n">ax_im</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ylim</span><span class="p">)</span>
+            <span class="c1"># draw with ShowGate</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_gate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">show_gate</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">ax_im</span><span class="p">,</span> <span class="o">**</span><span class="n">draw_gate_dict</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">ax_im</span><span class="p">,</span> <span class="n">ax_xprof</span><span class="p">,</span> <span class="n">ax_yprof</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="o">==</span> <span class="s1">&#39;1D&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -418,13 +414,16 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        r : dict</span>
-<span class="sd">            Keys: &#39;sum&#39;, &#39;mean&#39;, &#39;std&#39;, &#39;fwhm&#39;.</span>
+<span class="sd">        r : pd.DataFrame</span>
+<span class="sd">            columns (1D): &#39;Sum&#39;, &#39;Ratio&#39;, &#39;&lt;x&gt;&#39;, &#39;σx&#39;, &#39;FWHM&#39;;         </span>
+<span class="sd">            columns (2D): &#39;Sum&#39;, &#39;Ratio&#39;, &#39;&lt;x&gt;&#39;, &#39;&lt;y&gt;&#39;, &#39;σx&#39;, &#39;σy&#39;, &#39;FWHMx&#39;, &#39;FWHMy&#39;, &#39;ρ&#39;;</span>
+<span class="sd">            index: &#39;All&#39;, gate names, etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">mapped</span><span class="p">)</span>
         <span class="n">_cnt</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+        <span class="n">_cnt_sum</span> <span class="o">=</span> <span class="n">_cnt</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
         <span class="c1"># sum, ratio, avg_x, avg_y, std_x, std_y, fwhm_x, fwhm_y</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;All&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">_cnt</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="mf">1.0</span><span class="p">]}</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;All&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">_cnt_sum</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="o">==</span> <span class="s1">&#39;2D&#39;</span><span class="p">:</span>
             <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
             <span class="n">_stat</span> <span class="o">=</span> <span class="n">weighted_stats</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">p1</span><span class="p">],</span> <span class="n">_cnt</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="n">p2</span><span class="p">])</span>
@@ -434,62 +433,38 @@
                 <span class="o">*</span><span class="n">_stat</span><span class="p">[</span><span class="s1">&#39;fwhm&#39;</span><span class="p">],</span>
                 <span class="n">_stat</span><span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">],</span>
             <span class="p">])</span>
-            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Sum&#39;</span><span class="p">,</span> <span class="s1">&#39;Ratio&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;x&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;y&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;σx&#39;</span><span class="p">,</span> <span class="s1">&#39;σy&#39;</span><span class="p">,</span>
-                     <span class="s1">&#39;FWHMx&#39;</span><span class="p">,</span> <span class="s1">&#39;FWHMy&#39;</span><span class="p">,</span> <span class="s1">&#39;ρ&#39;</span><span class="p">]</span>
+
+            <span class="c1"># Add rows for gate</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_gate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_gate</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;Contour&#39;</span><span class="p">:</span>
+                    <span class="n">df_in</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">show_gate</span><span class="o">.</span><span class="n">is_in</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">])]</span>
+                    <span class="n">_cnt1</span> <span class="o">=</span> <span class="n">df_in</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+                    <span class="n">_cnt1_sum</span> <span class="o">=</span> <span class="n">_cnt1</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                    <span class="n">_stat1</span> <span class="o">=</span> <span class="n">weighted_stats</span><span class="p">(</span><span class="n">df_in</span><span class="p">[</span><span class="n">p1</span><span class="p">],</span> <span class="n">_cnt1</span><span class="p">,</span> <span class="n">df_in</span><span class="p">[</span><span class="n">p2</span><span class="p">])</span>
+                    <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">show_gate</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">_cnt1_sum</span><span class="p">,</span> <span class="n">_cnt1_sum</span> <span class="o">/</span> <span class="n">_cnt_sum</span><span class="p">,</span>
+                        <span class="o">*</span><span class="n">_stat1</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">],</span>
+                        <span class="o">*</span><span class="n">_stat1</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">],</span>
+                        <span class="o">*</span><span class="n">_stat1</span><span class="p">[</span><span class="s1">&#39;fwhm&#39;</span><span class="p">],</span>
+                        <span class="n">_stat1</span><span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">],</span>
+                    <span class="p">]</span>
+            <span class="c1"># column names</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;Sum&#39;</span><span class="p">,</span> <span class="s1">&#39;Ratio&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;x&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;y&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;σx&#39;</span><span class="p">,</span> <span class="s1">&#39;σy&#39;</span><span class="p">,</span> <span class="s1">&#39;FWHMx&#39;</span><span class="p">,</span> <span class="s1">&#39;FWHMy&#39;</span><span class="p">,</span> <span class="s1">&#39;ρ&#39;</span>
+            <span class="p">]</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="o">==</span> <span class="s1">&#39;1D&#39;</span><span class="p">:</span>
             <span class="n">p1</span><span class="p">,</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
             <span class="n">p1_stat</span> <span class="o">=</span> <span class="n">weighted_stats</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">p1</span><span class="p">],</span> <span class="n">_cnt</span><span class="p">)</span>
-            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;All&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
-                <span class="n">p1_stat</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">],</span> <span class="n">p1_stat</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">],</span> <span class="n">p1_stat</span><span class="p">[</span><span class="s1">&#39;fwhm&#39;</span><span class="p">]</span>
-            <span class="p">])</span>
-            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Sum&#39;</span><span class="p">,</span> <span class="s1">&#39;Ratio&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;x&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;σx&#39;</span><span class="p">,</span> <span class="s1">&#39;FWHM&#39;</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;All&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">p1_stat</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">],</span> <span class="n">p1_stat</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">],</span> <span class="n">p1_stat</span><span class="p">[</span><span class="s1">&#39;fwhm&#39;</span><span class="p">]])</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Sum&#39;</span><span class="p">,</span> <span class="s1">&#39;Ratio&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;x&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;σx&#39;</span><span class="p">,</span> <span class="s1">&#39;FWHM&#39;</span><span class="p">]</span>
+            
+        <span class="c1">#</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span></div></div>
 
 
 <span class="k">def</span> <span class="nf">_map_fn</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">ch</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">low</span> <span class="o">+</span> <span class="n">ch</span> <span class="o">*</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="n">bins</span>
-
-
-<span class="n">ACTION_PARAMS</span> <span class="o">=</span> <span class="n">toml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">CDIR_PATH</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;action.toml&quot;</span><span class="p">))</span>
-
-<span class="n">SPEC_NAME_MAP</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Name&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;parameters&#39;</span><span class="p">:</span> <span class="s1">&#39;Parameters&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;axes&#39;</span><span class="p">:</span> <span class="s1">&#39;Axes&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;chantype&#39;</span><span class="p">:</span> <span class="s1">&#39;ChanType&#39;</span>
-<span class="p">}</span>
-
-<span class="n">GATE_NAME_MAP</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Name&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;parameters&#39;</span><span class="p">:</span> <span class="s1">&#39;Parameters&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;low&#39;</span><span class="p">:</span> <span class="s1">&#39;Low&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;high&#39;</span><span class="p">:</span> <span class="s1">&#39;High&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;points&#39;</span><span class="p">:</span> <span class="s1">&#39;Points&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;gates&#39;</span><span class="p">:</span> <span class="s1">&#39;Gates&#39;</span>
-<span class="p">}</span>
-
-<span class="n">GATE_TYPE_MAP</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;+&#39;</span><span class="p">:</span> <span class="s1">&#39;Or&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;-&#39;</span><span class="p">:</span> <span class="s1">&#39;Not&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;*&#39;</span><span class="p">:</span> <span class="s1">&#39;And&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="s1">&#39;Slice&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="s1">&#39;Band&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="s1">&#39;Contour&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;gs&#39;</span><span class="p">:</span> <span class="s1">&#39;Gamma Slice&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;gb&#39;</span><span class="p">:</span> <span class="s1">&#39;Gamma Band&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;gc&#39;</span><span class="p">:</span> <span class="s1">&#39;Gamma Contour&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;em&#39;</span><span class="p">:</span> <span class="s1">&#39;Equal Mask&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;am&#39;</span><span class="p">:</span> <span class="s1">&#39;And Mask&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;nm&#39;</span><span class="p">:</span> <span class="s1">&#39;Andnot Mask&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;True&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="s1">&#39;False&#39;</span>
-<span class="p">}</span>
-
-<span class="n">GATE_APPLY_MAP</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;-TRUE-&#39;</span><span class="p">:</span> <span class="s1">&#39;ungated&#39;</span>  <span class="c1"># ungated</span>
-<span class="p">}</span>
 </pre></div>
 
            </div>

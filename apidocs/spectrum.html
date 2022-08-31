@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spectrum &mdash; PySpecTcl 0.3.3 documentation</title>
+  <title>Spectrum &mdash; PySpecTcl 0.4.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -81,7 +81,7 @@
 <h1>Spectrum<a class="headerlink" href="#spectrum" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="spectcl.Spectrum">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spectcl.</span></span><span class="sig-name descname"><span class="pre">Spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spectcl.</span></span><span class="sig-name descname"><span class="pre">Spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/spectrum.html#Spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class for spectrum configuration and data.</p>
 <dl class="field-list simple">
@@ -118,11 +118,6 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="spectcl.Spectrum.del_gate">
-<span class="sig-name descname"><span class="pre">del_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.del_gate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.del_gate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="spectcl.Spectrum.dtype">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dtype</span></span><a class="headerlink" href="#spectcl.Spectrum.dtype" title="Permalink to this definition">¶</a></dt>
@@ -137,18 +132,23 @@
 <dl class="py property">
 <dt class="sig sig-object py" id="spectcl.Spectrum.gate">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gate</span></span><a class="headerlink" href="#spectcl.Spectrum.gate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gate</p>
+<dd><p>Return the applied gate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Gate</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.Spectrum.get_axes_values">
-<span class="sig-name descname"><span class="pre">get_axes_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.get_axes_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.get_axes_values" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_axes_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/spectrum.html#Spectrum.get_axes_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.get_axes_values" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of value of array for all axes.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.Spectrum.get_data">
-<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.get_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/spectrum.html#Spectrum.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.get_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the table of spectral data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -164,14 +164,14 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="spectcl.Spectrum.get_gate">
-<span class="sig-name descname"><span class="pre">get_gate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.get_gate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.get_gate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return applied gate.</p>
+<dt class="sig sig-object py" id="spectcl.Spectrum.is_gated">
+<span class="sig-name descname"><span class="pre">is_gated</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/spectrum.html#Spectrum.is_gated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.is_gated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return if the spectrum is applied with any gates.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.Spectrum.map_data">
-<span class="sig-name descname"><span class="pre">map_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.map_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.map_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">map_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/spectrum.html#Spectrum.map_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.map_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Map data from channel coordinate to world coordinate, add as new columns.</p>
 </dd></dl>
 
@@ -199,7 +199,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.Spectrum.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapped</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.plot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapped</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draw_gate_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/spectrum.html#Spectrum.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot spectrum data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -210,6 +210,7 @@
 <li><p><strong>show_grid</strong> (<em>bool</em>) – If show grid on x,y profile plots (1D plot) or not.</p></li>
 <li><p><strong>fillna</strong> (<em>bool</em>) – If fill empty count as nan, otherwise fill with zero.</p></li>
 <li><p><strong>mapped</strong> (<em>bool</em>) – If show data in mapped coordinate (world), otherwise show in channel coordinate.</p></li>
+<li><p><strong>draw_gate_dict</strong> (<em>dict</em>) – A dict of keyword arguments for drawing gate.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Keyword Arguments</dt>
@@ -234,22 +235,29 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="spectcl.Spectrum.set_gate">
-<span class="sig-name descname"><span class="pre">set_gate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.set_gate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.set_gate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set/update with <em>gate</em>.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="spectcl.Spectrum.show_gate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">show_gate</span></span><a class="headerlink" href="#spectcl.Spectrum.show_gate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the related gate for plotting only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Gate</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.Spectrum.stats">
-<span class="sig-name descname"><span class="pre">stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapped</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.stats" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapped</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/spectrum.html#Spectrum.stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the statistical info.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>r</strong> – Keys: ‘sum’, ‘mean’, ‘std’, ‘fwhm’.</p>
+<dd class="field-odd"><p><strong>r</strong> – columns (1D): ‘Sum’, ‘Ratio’, ‘&lt;x&gt;’, ‘σx’, ‘FWHM’;
+columns (2D): ‘Sum’, ‘Ratio’, ‘&lt;x&gt;’, ‘&lt;y&gt;’, ‘σx’, ‘σy’, ‘FWHMx’, ‘FWHMy’, ‘ρ’;
+index: ‘All’, gate names, etc.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict</p>
+<dd class="field-even"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -267,7 +275,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spectcl.Spectrum.to_image_tuple">
-<span class="sig-name descname"><span class="pre">to_image_tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/utils.html#Spectrum.to_image_tuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.to_image_tuple" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_image_tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spectcl/data/spectrum.html#Spectrum.to_image_tuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectcl.Spectrum.to_image_tuple" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return spectral data as the tuple of x,y,z image.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

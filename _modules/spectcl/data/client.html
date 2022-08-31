@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spectcl.data.client &mdash; PySpecTcl 0.3.3 documentation</title>
+  <title>spectcl.data.client &mdash; PySpecTcl 0.4.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -77,11 +77,11 @@
 
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">ACTION_PARAMS</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">make_response</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">Spectrum</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">GATE_NAME_MAP</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">GATE_TYPE_MAP</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">SPEC_NAME_MAP</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">GATE_APPLY_MAP</span>
+<span class="kn">from</span> <span class="nn">.spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
 
 <span class="n">DEFAULT_APP_NAME</span> <span class="o">=</span> <span class="s1">&#39;spectcl&#39;</span>
 <span class="n">DEFAULT_BASE_URL</span> <span class="o">=</span> <span class="s1">&#39;http://127.0.0.1&#39;</span>
@@ -434,8 +434,9 @@
 <span class="sd">        filter : str</span>
 <span class="sd">            Search pattern.</span>
 <span class="sd">        clean : str</span>
-<span class="sd">            Only work with group of &#39;gate&#39;.</span>
+<span class="sd">            Only work with group of &#39;gate&#39;, default is True.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">clean_gate</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;clean&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">group</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">VALID_GROUP_LIST</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">&#39; is not one of the supported: </span><span class="si">{</span><span class="n">VALID_GROUP_LIST</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -457,14 +458,15 @@
                 <span class="n">_df_sp</span> <span class="o">=</span> <span class="n">_df_gate1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_idx</span><span class="p">][</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Name&#39;</span><span class="p">:</span> <span class="s1">&#39;ShowGate&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_df_sp1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_idx</span><span class="p">])</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Name&#39;</span><span class="p">)</span>
                 <span class="n">r</span><span class="p">[</span><span class="s1">&#39;ShowGate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_df_sp</span><span class="p">[</span><span class="s1">&#39;ShowGate&#39;</span><span class="p">]</span>
                 <span class="n">r</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;_params_str&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">r</span>
             <span class="k">elif</span> <span class="n">group</span> <span class="o">==</span> <span class="s1">&#39;gate&#39;</span><span class="p">:</span>
                 <span class="c1"># remove gates with not-defined Parameters, but keep the ones with defined Gates</span>
-                <span class="k">if</span> <span class="n">kws</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;clean&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">clean_gate</span><span class="p">:</span>
                     <span class="n">r</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
                         <span class="n">r</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">Parameters</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">r</span><span class="o">.</span><span class="n">Gates</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
                         <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="c1">#r.drop(r[r[&#39;Parameters&#39;].isna()].index, inplace=True)</span>
-            <span class="k">return</span> <span class="n">r</span>
+                <span class="k">return</span> <span class="n">r</span>
 
     <span class="k">def</span> <span class="nf">get_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a instance of Spectrum for spectrum of the name defined by *name*.</span>
@@ -485,13 +487,12 @@
 <span class="sd">            Spectrum instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;as_raw&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-
         <span class="n">refresh_cache</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;refresh_cache&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gate_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_client</span><span class="p">):</span>
             <span class="n">c</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">refresh_cache</span><span class="o">=</span><span class="n">refresh_cache</span><span class="p">)</span>
-        <span class="n">_spectrum_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_client</span><span class="o">.</span><span class="n">_vlist_cache</span>
+        <span class="n">_spectrum_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="s1">&#39;spectrum&#39;</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_client</span><span class="o">.</span><span class="n">contents</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">as_raw</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
-        <span class="n">conf</span> <span class="o">=</span> <span class="n">_spectrum_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">conf</span> <span class="o">=</span> <span class="n">_spectrum_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">Spectrum</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
 
