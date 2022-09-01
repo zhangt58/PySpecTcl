@@ -67,7 +67,7 @@ class MyAppWindow(BaseAppForm, Ui_MainWindow):
                 port=os.environ.get('PORT', 8000)
         )
 
-        self.server_url_lineEdit.setText(self.client._data_client._base_uri)
+        self.server_url_lineEdit.setText(self.client._spectrum_client._base_uri)
         self.server_url_lineEdit.returnPressed.emit()
 
         self.daq_rate_lbl.setVisible(False)

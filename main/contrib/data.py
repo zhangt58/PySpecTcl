@@ -67,7 +67,7 @@ def export_spectrum_for_allison(filepath, spectrum, energy : float=1.022487) -> 
     filepath : str
         File path for the output json data file.
     spectrum : Spectrum
-        Spectrum object retrieved by DataClient.get_spectrum().
+        Spectrum object retrieved by SpecTclClient.get_spectrum().
     energy : float
         Particle energy in keV.
     """

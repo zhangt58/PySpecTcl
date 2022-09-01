@@ -4,13 +4,16 @@ import pandas as pd
 import requests
 from simplejson import JSONDecodeError
 
+from .gate import Gate
+from .spectrum import Spectrum
 from .utils import ACTION_PARAMS
 from .utils import make_response
 from .utils import GATE_NAME_MAP
 from .utils import GATE_TYPE_MAP
 from .utils import SPEC_NAME_MAP
 from .utils import GATE_APPLY_MAP
-from .spectrum import Spectrum
+from .utils import DTYPE_MAP_
+from .utils import STYPE_MAP_
 
 DEFAULT_APP_NAME = 'spectcl'
 DEFAULT_BASE_URL = 'http://127.0.0.1'
@@ -32,8 +35,10 @@ class _BaseClient(object):
     port : int
         Port number for service, default is 8000.
     """
-    def __init__(self, base_url=DEFAULT_BASE_URL,
-                 port=DEFAULT_PORT_NUMBER, name=DEFAULT_APP_NAME,
+    def __init__(self,
+                 base_url=DEFAULT_BASE_URL,
+                 port=DEFAULT_PORT_NUMBER,
+                 name=DEFAULT_APP_NAME,
                  group=DEFAULT_GROUP_NAME):
         self.name = name
         self._base_url = base_url
@@ -101,7 +106,10 @@ class _BaseClient(object):
         r : dict
             Pack retrieval as dict.
         """
-        p = {k: v for k, v in action_params.items() if k not in ('refresh_cache', )}
+        p = {
+            k: v
+            for k, v in action_params.items() if k not in ('refresh_cache', )
+        }
         is_valid = self.validate_action(action, p)
         if not is_valid:
             return
@@ -117,7 +125,8 @@ class _BaseClient(object):
         for i in action_params:
             if i not in params['arg']:
                 print('-- {} is not a valid action parameter.'.format(i))
-                print("-- Valid action Parameters of {}: {}".format(self._group, ','.join(params)))
+                print("-- Valid action Parameters of {}: {}".format(
+                    self._group, ','.join(params)))
                 return False
         return True
 
@@ -125,10 +134,12 @@ class _BaseClient(object):
         return f"[Data Client] SpecTcl REST Service on: {self._base_uri}"
 
 
-class SpecTclDataClient(_BaseClient):
-    """Client for spectral data retrieval.
+class SpecTclSpectrumClient(_BaseClient):
+    """Client for spectrum API.
     """
-    def __init__(self, base_url=DEFAULT_BASE_URL, port=DEFAULT_PORT_NUMBER,
+    def __init__(self,
+                 base_url=DEFAULT_BASE_URL,
+                 port=DEFAULT_PORT_NUMBER,
                  name=DEFAULT_APP_NAME):
         super(self.__class__, self).__init__(base_url, port, name, "spectrum")
 
@@ -148,6 +159,8 @@ class SpecTclDataClient(_BaseClient):
             Table of spectrum configurations.
         """
         r = self.get("list", **kws)
+        if r == []:
+            return None
         df = pd.DataFrame.from_records(r)
         df.rename(columns=SPEC_NAME_MAP, inplace=True)
         df.set_index('Name', inplace=True)
@@ -183,10 +196,19 @@ class SpecTclDataClient(_BaseClient):
             spec_conf = self._vlist_cache.loc[name]
             if not as_raw:
                 params = spec_conf.Parameters
-                if len(params) == 1: # type '1'
-                    df.rename(columns={'x': params[0], 'v': 'count'}, inplace=True)
-                elif len(params) == 2: # type '2'
-                    df.rename(columns={'x': params[0], 'y': params[1], 'v': 'count'}, inplace=True)
+                if len(params) == 1:  # type '1'
+                    df.rename(columns={
+                        'x': params[0],
+                        'v': 'count'
+                    },
+                              inplace=True)
+                elif len(params) == 2:  # type '2'
+                    df.rename(columns={
+                        'x': params[0],
+                        'y': params[1],
+                        'v': 'count'
+                    },
+                              inplace=True)
             return df
 
     def parameters(self, name):
@@ -210,11 +232,47 @@ class SpecTclDataClient(_BaseClient):
         else:
             return conf.Parameters
 
+    def create(self, name, type, parameters, axes, **kws):
+        """Create a new spectrum.
+
+        Parameters
+        ----------
+        name : str
+            The name of the new spectrum.
+        type : str
+            Spectrum type.
+        parameters : list
+            A list of parameters.
+        axes : str
+            Axes definition.
+        
+        Keyword Arguments
+        -----------------
+        chantype : str
+            Channel type, default is long.
+        """
+        params = {
+            'name': name,
+            'type': type,
+            'parameters': parameters,
+            'axes': axes,
+            'chantype': kws.get('chantype', 'long')
+        }
+        r = self.get("create", **params)
+        if r != 'OK but no details':
+            return None
+        else:
+            # refresh cache
+            self.list(refresh_cache=True)
+            return r
+
 
 class SpecTclGateClient(_BaseClient):
     """Client for gate service group.
     """
-    def __init__(self, base_url=DEFAULT_BASE_URL, port=DEFAULT_PORT_NUMBER,
+    def __init__(self,
+                 base_url=DEFAULT_BASE_URL,
+                 port=DEFAULT_PORT_NUMBER,
                  name=DEFAULT_APP_NAME):
         super(self.__class__, self).__init__(base_url, port, name, "gate")
 
@@ -248,7 +306,9 @@ class SpecTclGateClient(_BaseClient):
 class SpecTclApplyClient(_BaseClient):
     """Client for apply service group. (gate application)
     """
-    def __init__(self, base_url=DEFAULT_BASE_URL, port=DEFAULT_PORT_NUMBER,
+    def __init__(self,
+                 base_url=DEFAULT_BASE_URL,
+                 port=DEFAULT_PORT_NUMBER,
                  name=DEFAULT_APP_NAME):
         super(self.__class__, self).__init__(base_url, port, name, "apply")
 
@@ -311,20 +371,22 @@ class SpecTclClient(object):
     >>> sp.gate
     >>> sp.gate = <gate name>
     """
-    def __init__(self, base_url=DEFAULT_BASE_URL,
-                 port=DEFAULT_PORT_NUMBER, name=DEFAULT_APP_NAME):
+    def __init__(self,
+                 base_url=DEFAULT_BASE_URL,
+                 port=DEFAULT_PORT_NUMBER,
+                 name=DEFAULT_APP_NAME):
         self.name = name
         self._base_url = base_url
         self._port = port
         #
-        self._data_client = SpecTclDataClient(base_url, port, name)
+        self._spectrum_client = SpecTclSpectrumClient(base_url, port, name)
         self._gate_client = SpecTclGateClient(base_url, port, name)
         self._apply_client = SpecTclApplyClient(base_url, port, name)
         #
         self.__list_map = {
-                'spectrum': self._data_client,
-                'gate': self._gate_client,
-                'apply': self._apply_client
+            'spectrum': self._spectrum_client,
+            'gate': self._gate_client,
+            'apply': self._apply_client
         }
 
     @property
@@ -334,7 +396,8 @@ class SpecTclClient(object):
     @port.setter
     def port(self, i):
         self._port = i
-        for c in (self._data_client, self._gate_client, self._apply_client):
+        for c in (self._spectrum_client, self._gate_client,
+                  self._apply_client):
             c.port = i
 
     @property
@@ -344,7 +407,8 @@ class SpecTclClient(object):
     @base_url.setter
     def base_url(self, s):
         self._base_url = s
-        for c in (self._data_client, self._gate_client, self._apply_client):
+        for c in (self._spectrum_client, self._gate_client,
+                  self._apply_client):
             c.base_url = s
 
     def __repr__(self):
@@ -367,35 +431,69 @@ class SpecTclClient(object):
         """
         clean_gate = kws.pop('clean', True)
         if group not in VALID_GROUP_LIST:
-            print(f"'{group}' is not one of the supported: {VALID_GROUP_LIST}.")
+            print(
+                f"'{group}' is not one of the supported: {VALID_GROUP_LIST}.")
             return None
         else:
             r = self.__list_map.get(group).list(**kws)
+            if r is None:
+                return None
             if group == 'spectrum':
                 # append gated column
                 gate_apply_data = self._apply_client.list()
-                r['Gate'] = r.apply(lambda i: gate_apply_data.loc[i.name].desc, axis=1)
+                r['Gate'] = r.apply(lambda i: gate_apply_data.loc[i.name].desc,
+                                    axis=1)
                 r.drop(columns=['gate'], inplace=True)
                 # append a column '_gate_viz': the name of gate which matches the Parameters, which is for drawing gate
-                # with the spectrum.                
+                # with the spectrum.
                 _df_gate = self.list('gate')
                 r['_params_str'] = r.apply(lambda i: str(i.Parameters), axis=1)
-                _df_gate['_params_str'] = _df_gate.apply(lambda i: str(i.Parameters), axis=1)
+                _df_gate['_params_str'] = _df_gate.apply(
+                    lambda i: str(i.Parameters), axis=1)
                 _df_gate1 = _df_gate.reset_index().set_index('_params_str')
                 _df_sp1 = r.reset_index().set_index('_params_str')
                 _idx = _df_sp1.index.intersection(_df_gate1.index)
-                _df_sp = _df_gate1.loc[_idx]['Name'].to_frame().rename(columns={'Name': 'ShowGate'}).join(_df_sp1.loc[_idx]).set_index('Name')
+                _df_sp = _df_gate1.loc[_idx]['Name'].to_frame().rename(
+                    columns={
+                        'Name': 'ShowGate'
+                    }).join(_df_sp1.loc[_idx]).set_index('Name')
                 r['ShowGate'] = _df_sp['ShowGate']
                 r.drop(columns=['_params_str'], inplace=True)
                 return r
             elif group == 'gate':
                 # remove gates with not-defined Parameters, but keep the ones with defined Gates
                 if clean_gate:
-                    r.drop(
-                        r[r.Parameters.isna() & r.Gates.isna()].index,
-                        inplace=True)
-                #r.drop(r[r['Parameters'].isna()].index, inplace=True)
+                    r.drop(r[r.Parameters.isna() & r.Gates.isna()].index,
+                           inplace=True)
                 return r
+
+    def add_spectrum(self, sp: Spectrum):
+        """Create a new spectrum.
+
+        Returns
+        -------
+        r : Spectrum
+            New added Spectrum object.
+        """
+        # test if the name is existing
+        if sp.name in self.list('spectrum').index:
+            print(
+                "The spectrum is already defined, please give a different name."
+            )
+            return None
+        _axes = ' '.join([
+            str([int(j) for j in i.values()]) for i in sp.axes
+        ]).replace('[', '{').replace(']', '}').replace(',', '')
+        r = self._spectrum_client.create(
+            sp.name,
+            STYPE_MAP_[sp.stype],
+            sp.parameters,
+            _axes,
+            chantype=DTYPE_MAP_[sp.dtype],
+        )
+        if r is not None:
+            # return the new created spectrum as a Spectrum object.
+            return self.get_spectrum(sp.name)
 
     def get_spectrum(self, name, **kws):
         """Return a instance of Spectrum for spectrum of the name defined by *name*.
@@ -417,19 +515,39 @@ class SpecTclClient(object):
         """
         kws.pop('as_raw', None)
         refresh_cache = kws.pop('refresh_cache', False)
-        for c in (self._data_client, self._gate_client, self._apply_client):
+        for c in (self._spectrum_client, self._gate_client,
+                  self._apply_client):
             c.list(refresh_cache=refresh_cache)
         _spectrum_df = self.list('spectrum')
-        data = self._data_client.contents(name, as_raw=True, **kws)
+        data = self._spectrum_client.contents(name, as_raw=True, **kws)
         conf = _spectrum_df.loc[name]
         return Spectrum(name, conf, data, client=self)
+
+    def get_gate(self, name: str):
+        """Return a instance of Gate for gate of the name defined by *name*.
+        
+        Parameters
+        ----------
+        name : str
+            Name of the gate.
+        
+        Returns
+        -------
+        r : Gate
+            Gate instance.
+        """
+        df_gate = self.list('gate')
+        if name in df_gate.index:
+            return Gate(df_gate.loc[name])
+        else:
+            return None
 
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from pandas import DataFrame
 
-    c = SpecTclDataClient()
+    c = SpecTclSpectrumClient()
     print(c)
 
     data1 = c.get('contents', name='s1')
