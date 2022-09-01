@@ -294,7 +294,7 @@ class Spectrum(object):
         r : Axes, List[Axes]
             Axes for 1D, and (ax_image, ax_xprofile, ax_yprofile) for 2D spectrum.
         """
-        figsize = kws.pop('figsize', (10, 8))
+        figsize = kws.pop('figsize', (8, 6))
         fontsize = kws.pop('fontsize', 12)
         xlim = kws.pop('xlim', None)
         ylim = kws.pop('ylim', None)
