@@ -17,6 +17,9 @@ STYPE_MAP = {
     '2': '2D',
     's': 's',
 }
+STYPE_MAP_ = {v: k for k, v in STYPE_MAP.items()}
+DTYPE_MAP_ = {v: k for k, v in DTYPE_MAP.items()}
+
 
 class MyAdapter(HTTPAdapter):
     pass
@@ -26,7 +29,7 @@ class MyAdapter(HTTPAdapter):
 
 def make_response(r):
     if r.ok and r.json()['status'] == 'OK':
-        return r.json()['detail']
+        return r.json().get('detail', 'OK but no details')
     else:
         raise NotFoundSpecTclDataError
 
