@@ -75,13 +75,16 @@
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">simplejson</span> <span class="kn">import</span> <span class="n">JSONDecodeError</span>
 
+<span class="kn">from</span> <span class="nn">.gate</span> <span class="kn">import</span> <span class="n">Gate</span>
+<span class="kn">from</span> <span class="nn">.spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">ACTION_PARAMS</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">make_response</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">GATE_NAME_MAP</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">GATE_TYPE_MAP</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">SPEC_NAME_MAP</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">GATE_APPLY_MAP</span>
-<span class="kn">from</span> <span class="nn">.spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">DTYPE_MAP_</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">STYPE_MAP_</span>
 
 <span class="n">DEFAULT_APP_NAME</span> <span class="o">=</span> <span class="s1">&#39;spectcl&#39;</span>
 <span class="n">DEFAULT_BASE_URL</span> <span class="o">=</span> <span class="s1">&#39;http://127.0.0.1&#39;</span>
@@ -103,8 +106,10 @@
 <span class="sd">    port : int</span>
 <span class="sd">        Port number for service, default is 8000.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="n">DEFAULT_BASE_URL</span><span class="p">,</span>
-                 <span class="n">port</span><span class="o">=</span><span class="n">DEFAULT_PORT_NUMBER</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">DEFAULT_APP_NAME</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">base_url</span><span class="o">=</span><span class="n">DEFAULT_BASE_URL</span><span class="p">,</span>
+                 <span class="n">port</span><span class="o">=</span><span class="n">DEFAULT_PORT_NUMBER</span><span class="p">,</span>
+                 <span class="n">name</span><span class="o">=</span><span class="n">DEFAULT_APP_NAME</span><span class="p">,</span>
                  <span class="n">group</span><span class="o">=</span><span class="n">DEFAULT_GROUP_NAME</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_base_url</span> <span class="o">=</span> <span class="n">base_url</span>
@@ -172,7 +177,10 @@
 <span class="sd">        r : dict</span>
 <span class="sd">            Pack retrieval as dict.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">action_params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;refresh_cache&#39;</span><span class="p">,</span> <span class="p">)}</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">action_params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;refresh_cache&#39;</span><span class="p">,</span> <span class="p">)</span>
+        <span class="p">}</span>
         <span class="n">is_valid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_action</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid</span><span class="p">:</span>
             <span class="k">return</span>
@@ -188,7 +196,8 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">action_params</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;arg&#39;</span><span class="p">]:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-- </span><span class="si">{}</span><span class="s1"> is not a valid action parameter.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-- Valid action Parameters of </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">params</span><span class="p">)))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-- Valid action Parameters of </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">params</span><span class="p">)))</span>
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 
@@ -196,14 +205,16 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[Data Client] SpecTcl REST Service on: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_uri</span><span class="si">}</span><span class="s2">&quot;</span>
 
 
-<div class="viewcode-block" id="SpecTclDataClient"><a class="viewcode-back" href="../../../apidocs/client.html#spectcl.SpecTclDataClient">[docs]</a><span class="k">class</span> <span class="nc">SpecTclDataClient</span><span class="p">(</span><span class="n">_BaseClient</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Client for spectral data retrieval.</span>
+<span class="k">class</span> <span class="nc">SpecTclSpectrumClient</span><span class="p">(</span><span class="n">_BaseClient</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Client for spectrum API.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="n">DEFAULT_BASE_URL</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">DEFAULT_PORT_NUMBER</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">base_url</span><span class="o">=</span><span class="n">DEFAULT_BASE_URL</span><span class="p">,</span>
+                 <span class="n">port</span><span class="o">=</span><span class="n">DEFAULT_PORT_NUMBER</span><span class="p">,</span>
                  <span class="n">name</span><span class="o">=</span><span class="n">DEFAULT_APP_NAME</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">base_url</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;spectrum&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SpecTclDataClient.list"><a class="viewcode-back" href="../../../apidocs/client.html#spectcl.SpecTclDataClient.list">[docs]</a>    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;List defined spectra.</span>
 
 <span class="sd">        Keyword Arguments</span>
@@ -219,14 +230,16 @@
 <span class="sd">            Table of spectrum configurations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;list&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">SPEC_NAME_MAP</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">kws</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;refresh_cache&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_vlist_cache</span> <span class="o">=</span> <span class="n">df</span>
-        <span class="k">return</span> <span class="n">df</span></div>
+        <span class="k">return</span> <span class="n">df</span>
 
-<div class="viewcode-block" id="SpecTclDataClient.contents"><a class="viewcode-back" href="../../../apidocs/client.html#spectcl.SpecTclDataClient.contents">[docs]</a>    <span class="k">def</span> <span class="nf">contents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">contents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the data of spectrum named *name*.</span>
 
 <span class="sd">        Parameters</span>
@@ -254,13 +267,22 @@
             <span class="n">spec_conf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vlist_cache</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">as_raw</span><span class="p">:</span>
                 <span class="n">params</span> <span class="o">=</span> <span class="n">spec_conf</span><span class="o">.</span><span class="n">Parameters</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># type &#39;1&#39;</span>
-                    <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;count&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="c1"># type &#39;2&#39;</span>
-                    <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;count&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">df</span></div>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># type &#39;1&#39;</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;count&#39;</span>
+                    <span class="p">},</span>
+                              <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># type &#39;2&#39;</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;count&#39;</span>
+                    <span class="p">},</span>
+                              <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">df</span>
 
-<div class="viewcode-block" id="SpecTclDataClient.parameters"><a class="viewcode-back" href="../../../apidocs/client.html#spectcl.SpecTclDataClient.parameters">[docs]</a>    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convenient method to return the parameters of a spectrum defined</span>
 <span class="sd">        by *name*.</span>
 
@@ -279,13 +301,49 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">conf</span><span class="o">.</span><span class="n">Parameters</span></div></div>
+            <span class="k">return</span> <span class="n">conf</span><span class="o">.</span><span class="n">Parameters</span>
+
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a new spectrum.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            The name of the new spectrum.</span>
+<span class="sd">        type : str</span>
+<span class="sd">            Spectrum type.</span>
+<span class="sd">        parameters : list</span>
+<span class="sd">            A list of parameters.</span>
+<span class="sd">        axes : str</span>
+<span class="sd">            Axes definition.</span>
+<span class="sd">        </span>
+<span class="sd">        Keyword Arguments</span>
+<span class="sd">        -----------------</span>
+<span class="sd">        chantype : str</span>
+<span class="sd">            Channel type, default is long.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+            <span class="s1">&#39;parameters&#39;</span><span class="p">:</span> <span class="n">parameters</span><span class="p">,</span>
+            <span class="s1">&#39;axes&#39;</span><span class="p">:</span> <span class="n">axes</span><span class="p">,</span>
+            <span class="s1">&#39;chantype&#39;</span><span class="p">:</span> <span class="n">kws</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;chantype&#39;</span><span class="p">,</span> <span class="s1">&#39;long&#39;</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;create&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">!=</span> <span class="s1">&#39;OK but no details&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># refresh cache</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">refresh_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">r</span>
 
 
 <div class="viewcode-block" id="SpecTclGateClient"><a class="viewcode-back" href="../../../apidocs/client.html#spectcl.SpecTclGateClient">[docs]</a><span class="k">class</span> <span class="nc">SpecTclGateClient</span><span class="p">(</span><span class="n">_BaseClient</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Client for gate service group.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="n">DEFAULT_BASE_URL</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">DEFAULT_PORT_NUMBER</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">base_url</span><span class="o">=</span><span class="n">DEFAULT_BASE_URL</span><span class="p">,</span>
+                 <span class="n">port</span><span class="o">=</span><span class="n">DEFAULT_PORT_NUMBER</span><span class="p">,</span>
                  <span class="n">name</span><span class="o">=</span><span class="n">DEFAULT_APP_NAME</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">base_url</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;gate&quot;</span><span class="p">)</span>
 
@@ -319,7 +377,9 @@
 <span class="k">class</span> <span class="nc">SpecTclApplyClient</span><span class="p">(</span><span class="n">_BaseClient</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Client for apply service group. (gate application)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="n">DEFAULT_BASE_URL</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">DEFAULT_PORT_NUMBER</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">base_url</span><span class="o">=</span><span class="n">DEFAULT_BASE_URL</span><span class="p">,</span>
+                 <span class="n">port</span><span class="o">=</span><span class="n">DEFAULT_PORT_NUMBER</span><span class="p">,</span>
                  <span class="n">name</span><span class="o">=</span><span class="n">DEFAULT_APP_NAME</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">base_url</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;apply&quot;</span><span class="p">)</span>
 
@@ -382,20 +442,22 @@
 <span class="sd">    &gt;&gt;&gt; sp.gate</span>
 <span class="sd">    &gt;&gt;&gt; sp.gate = &lt;gate name&gt;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="n">DEFAULT_BASE_URL</span><span class="p">,</span>
-                 <span class="n">port</span><span class="o">=</span><span class="n">DEFAULT_PORT_NUMBER</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">DEFAULT_APP_NAME</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">base_url</span><span class="o">=</span><span class="n">DEFAULT_BASE_URL</span><span class="p">,</span>
+                 <span class="n">port</span><span class="o">=</span><span class="n">DEFAULT_PORT_NUMBER</span><span class="p">,</span>
+                 <span class="n">name</span><span class="o">=</span><span class="n">DEFAULT_APP_NAME</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_base_url</span> <span class="o">=</span> <span class="n">base_url</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_port</span> <span class="o">=</span> <span class="n">port</span>
         <span class="c1">#</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data_client</span> <span class="o">=</span> <span class="n">SpecTclDataClient</span><span class="p">(</span><span class="n">base_url</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spectrum_client</span> <span class="o">=</span> <span class="n">SpecTclSpectrumClient</span><span class="p">(</span><span class="n">base_url</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gate_client</span> <span class="o">=</span> <span class="n">SpecTclGateClient</span><span class="p">(</span><span class="n">base_url</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_apply_client</span> <span class="o">=</span> <span class="n">SpecTclApplyClient</span><span class="p">(</span><span class="n">base_url</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="c1">#</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__list_map</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;spectrum&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_client</span><span class="p">,</span>
-                <span class="s1">&#39;gate&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gate_client</span><span class="p">,</span>
-                <span class="s1">&#39;apply&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_client</span>
+            <span class="s1">&#39;spectrum&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrum_client</span><span class="p">,</span>
+            <span class="s1">&#39;gate&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gate_client</span><span class="p">,</span>
+            <span class="s1">&#39;apply&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_client</span>
         <span class="p">}</span>
 
     <span class="nd">@property</span>
@@ -405,7 +467,8 @@
     <span class="nd">@port</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">port</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_port</span> <span class="o">=</span> <span class="n">i</span>
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gate_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_client</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spectrum_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gate_client</span><span class="p">,</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">_apply_client</span><span class="p">):</span>
             <span class="n">c</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">i</span>
 
     <span class="nd">@property</span>
@@ -415,7 +478,8 @@
     <span class="nd">@base_url</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">base_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_base_url</span> <span class="o">=</span> <span class="n">s</span>
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gate_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_client</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spectrum_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gate_client</span><span class="p">,</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">_apply_client</span><span class="p">):</span>
             <span class="n">c</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="n">s</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -438,35 +502,69 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">clean_gate</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;clean&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">group</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">VALID_GROUP_LIST</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">&#39; is not one of the supported: </span><span class="si">{</span><span class="n">VALID_GROUP_LIST</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">&#39; is not one of the supported: </span><span class="si">{</span><span class="n">VALID_GROUP_LIST</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__list_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="o">**</span><span class="n">kws</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">group</span> <span class="o">==</span> <span class="s1">&#39;spectrum&#39;</span><span class="p">:</span>
                 <span class="c1"># append gated column</span>
                 <span class="n">gate_apply_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_client</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
-                <span class="n">r</span><span class="p">[</span><span class="s1">&#39;Gate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">gate_apply_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">desc</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">r</span><span class="p">[</span><span class="s1">&#39;Gate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">gate_apply_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">desc</span><span class="p">,</span>
+                                    <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="n">r</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;gate&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="c1"># append a column &#39;_gate_viz&#39;: the name of gate which matches the Parameters, which is for drawing gate</span>
-                <span class="c1"># with the spectrum.                </span>
+                <span class="c1"># with the spectrum.</span>
                 <span class="n">_df_gate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="s1">&#39;gate&#39;</span><span class="p">)</span>
                 <span class="n">r</span><span class="p">[</span><span class="s1">&#39;_params_str&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">Parameters</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">_df_gate</span><span class="p">[</span><span class="s1">&#39;_params_str&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_df_gate</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">Parameters</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">_df_gate</span><span class="p">[</span><span class="s1">&#39;_params_str&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_df_gate</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">Parameters</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="n">_df_gate1</span> <span class="o">=</span> <span class="n">_df_gate</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;_params_str&#39;</span><span class="p">)</span>
                 <span class="n">_df_sp1</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;_params_str&#39;</span><span class="p">)</span>
                 <span class="n">_idx</span> <span class="o">=</span> <span class="n">_df_sp1</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">_df_gate1</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-                <span class="n">_df_sp</span> <span class="o">=</span> <span class="n">_df_gate1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_idx</span><span class="p">][</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Name&#39;</span><span class="p">:</span> <span class="s1">&#39;ShowGate&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_df_sp1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_idx</span><span class="p">])</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Name&#39;</span><span class="p">)</span>
+                <span class="n">_df_sp</span> <span class="o">=</span> <span class="n">_df_gate1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_idx</span><span class="p">][</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+                    <span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+                        <span class="s1">&#39;Name&#39;</span><span class="p">:</span> <span class="s1">&#39;ShowGate&#39;</span>
+                    <span class="p">})</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_df_sp1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">_idx</span><span class="p">])</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Name&#39;</span><span class="p">)</span>
                 <span class="n">r</span><span class="p">[</span><span class="s1">&#39;ShowGate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_df_sp</span><span class="p">[</span><span class="s1">&#39;ShowGate&#39;</span><span class="p">]</span>
                 <span class="n">r</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;_params_str&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">r</span>
             <span class="k">elif</span> <span class="n">group</span> <span class="o">==</span> <span class="s1">&#39;gate&#39;</span><span class="p">:</span>
                 <span class="c1"># remove gates with not-defined Parameters, but keep the ones with defined Gates</span>
                 <span class="k">if</span> <span class="n">clean_gate</span><span class="p">:</span>
-                    <span class="n">r</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
-                        <span class="n">r</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">Parameters</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">r</span><span class="o">.</span><span class="n">Gates</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
-                        <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="c1">#r.drop(r[r[&#39;Parameters&#39;].isna()].index, inplace=True)</span>
+                    <span class="n">r</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">Parameters</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">r</span><span class="o">.</span><span class="n">Gates</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+                           <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">r</span>
+
+    <span class="k">def</span> <span class="nf">add_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sp</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a new spectrum.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        r : Spectrum</span>
+<span class="sd">            New added Spectrum object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># test if the name is existing</span>
+        <span class="k">if</span> <span class="n">sp</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="s1">&#39;spectrum&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;The spectrum is already defined, please give a different name.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">_axes</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+            <span class="nb">str</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">i</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sp</span><span class="o">.</span><span class="n">axes</span>
+        <span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;{&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="s1">&#39;}&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrum_client</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">sp</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">STYPE_MAP_</span><span class="p">[</span><span class="n">sp</span><span class="o">.</span><span class="n">stype</span><span class="p">],</span>
+            <span class="n">sp</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+            <span class="n">_axes</span><span class="p">,</span>
+            <span class="n">chantype</span><span class="o">=</span><span class="n">DTYPE_MAP_</span><span class="p">[</span><span class="n">sp</span><span class="o">.</span><span class="n">dtype</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># return the new created spectrum as a Spectrum object.</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spectrum</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a instance of Spectrum for spectrum of the name defined by *name*.</span>
@@ -488,19 +586,39 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;as_raw&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">refresh_cache</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;refresh_cache&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gate_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_client</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spectrum_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gate_client</span><span class="p">,</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">_apply_client</span><span class="p">):</span>
             <span class="n">c</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">refresh_cache</span><span class="o">=</span><span class="n">refresh_cache</span><span class="p">)</span>
         <span class="n">_spectrum_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="s1">&#39;spectrum&#39;</span><span class="p">)</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_client</span><span class="o">.</span><span class="n">contents</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">as_raw</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spectrum_client</span><span class="o">.</span><span class="n">contents</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">as_raw</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">)</span>
         <span class="n">conf</span> <span class="o">=</span> <span class="n">_spectrum_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">Spectrum</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a instance of Gate for gate of the name defined by *name*.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Name of the gate.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        r : Gate</span>
+<span class="sd">            Gate instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df_gate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="s1">&#39;gate&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">df_gate</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Gate</span><span class="p">(</span><span class="n">df_gate</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
     <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
 
-    <span class="n">c</span> <span class="o">=</span> <span class="n">SpecTclDataClient</span><span class="p">()</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">SpecTclSpectrumClient</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
     <span class="n">data1</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;contents&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;s1&#39;</span><span class="p">)</span>

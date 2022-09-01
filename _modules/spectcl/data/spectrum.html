@@ -118,6 +118,11 @@
         <span class="c1"># set up gate and showgate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_gate</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">Gate</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">ShowGate</span><span class="p">)</span>
 
+<div class="viewcode-block" id="Spectrum.clone"><a class="viewcode-back" href="../../../apidocs/spectrum.html#spectcl.Spectrum.clone">[docs]</a>    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a _Spectrum object, without data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_Spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">_set_gate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applied_gate</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">show_gate</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Integrate gate info.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -461,6 +466,17 @@
             
         <span class="c1">#</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">_Spectrum</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Wrap Spectrum basic info, for create new spectra.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sp</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">axes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">dtype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stype</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">stype</span>
 
 
 <span class="k">def</span> <span class="nf">_map_fn</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">ch</span><span class="p">):</span>
