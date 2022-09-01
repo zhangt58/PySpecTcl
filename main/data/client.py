@@ -4,13 +4,14 @@ import pandas as pd
 import requests
 from simplejson import JSONDecodeError
 
+from .gate import Gate
+from .spectrum import Spectrum
 from .utils import ACTION_PARAMS
 from .utils import make_response
 from .utils import GATE_NAME_MAP
 from .utils import GATE_TYPE_MAP
 from .utils import SPEC_NAME_MAP
 from .utils import GATE_APPLY_MAP
-from .spectrum import Spectrum
 
 DEFAULT_APP_NAME = 'spectcl'
 DEFAULT_BASE_URL = 'http://127.0.0.1'
@@ -148,6 +149,8 @@ class SpecTclDataClient(_BaseClient):
             Table of spectrum configurations.
         """
         r = self.get("list", **kws)
+        if r == []:
+            return None
         df = pd.DataFrame.from_records(r)
         df.rename(columns=SPEC_NAME_MAP, inplace=True)
         df.set_index('Name', inplace=True)
@@ -371,6 +374,8 @@ class SpecTclClient(object):
             return None
         else:
             r = self.__list_map.get(group).list(**kws)
+            if r is None:
+                return None
             if group == 'spectrum':
                 # append gated column
                 gate_apply_data = self._apply_client.list()
@@ -423,6 +428,25 @@ class SpecTclClient(object):
         data = self._data_client.contents(name, as_raw=True, **kws)
         conf = _spectrum_df.loc[name]
         return Spectrum(name, conf, data, client=self)
+    
+    def get_gate(self, name: str):
+        """Return a instance of Gate for gate of the name defined by *name*.
+        
+        Parameters
+        ----------
+        name : str
+            Name of the gate.
+        
+        Returns
+        -------
+        r : Gate
+            Gate instance.
+        """
+        df_gate = self.list('gate')
+        if name in df_gate.index:
+            return Gate(df_gate.loc[name])
+        else:
+            return None
 
 
 if __name__ == '__main__':
