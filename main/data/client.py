@@ -126,8 +126,8 @@ class _BaseClient(object):
         return f"[Data Client] SpecTcl REST Service on: {self._base_uri}"
 
 
-class SpecTclDataClient(_BaseClient):
-    """Client for spectral data retrieval.
+class SpecTclSpectrumClient(_BaseClient):
+    """Client for spectrum API.
     """
     def __init__(self, base_url=DEFAULT_BASE_URL, port=DEFAULT_PORT_NUMBER,
                  name=DEFAULT_APP_NAME):
@@ -320,12 +320,12 @@ class SpecTclClient(object):
         self._base_url = base_url
         self._port = port
         #
-        self._data_client = SpecTclDataClient(base_url, port, name)
+        self._spectrum_client = SpecTclSpectrumClient(base_url, port, name)
         self._gate_client = SpecTclGateClient(base_url, port, name)
         self._apply_client = SpecTclApplyClient(base_url, port, name)
         #
         self.__list_map = {
-                'spectrum': self._data_client,
+                'spectrum': self._spectrum_client,
                 'gate': self._gate_client,
                 'apply': self._apply_client
         }
@@ -337,7 +337,7 @@ class SpecTclClient(object):
     @port.setter
     def port(self, i):
         self._port = i
-        for c in (self._data_client, self._gate_client, self._apply_client):
+        for c in (self._spectrum_client, self._gate_client, self._apply_client):
             c.port = i
 
     @property
@@ -347,7 +347,7 @@ class SpecTclClient(object):
     @base_url.setter
     def base_url(self, s):
         self._base_url = s
-        for c in (self._data_client, self._gate_client, self._apply_client):
+        for c in (self._spectrum_client, self._gate_client, self._apply_client):
             c.base_url = s
 
     def __repr__(self):
@@ -401,6 +401,10 @@ class SpecTclClient(object):
                         inplace=True)
                 #r.drop(r[r['Parameters'].isna()].index, inplace=True)
                 return r
+    def add_spectrum(self, sp: Spectrum):
+        """Create a new spectrum.
+        """
+        
 
     def get_spectrum(self, name, **kws):
         """Return a instance of Spectrum for spectrum of the name defined by *name*.
@@ -422,10 +426,10 @@ class SpecTclClient(object):
         """
         kws.pop('as_raw', None)
         refresh_cache = kws.pop('refresh_cache', False)
-        for c in (self._data_client, self._gate_client, self._apply_client):
+        for c in (self._spectrum_client, self._gate_client, self._apply_client):
             c.list(refresh_cache=refresh_cache)
         _spectrum_df = self.list('spectrum')
-        data = self._data_client.contents(name, as_raw=True, **kws)
+        data = self._spectrum_client.contents(name, as_raw=True, **kws)
         conf = _spectrum_df.loc[name]
         return Spectrum(name, conf, data, client=self)
     
@@ -453,7 +457,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from pandas import DataFrame
 
-    c = SpecTclDataClient()
+    c = SpecTclSpectrumClient()
     print(c)
 
     data1 = c.get('contents', name='s1')
