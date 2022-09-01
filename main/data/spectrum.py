@@ -47,6 +47,11 @@ class Spectrum(object):
         # set up gate and showgate
         self._set_gate(conf.Gate, conf.ShowGate)
 
+    def clone(self):
+        """Return a _Spectrum object, without data.
+        """
+        return _Spectrum(self)
+
     def _set_gate(self, applied_gate: str, show_gate: str):
         """Integrate gate info.
         """
@@ -390,6 +395,17 @@ class Spectrum(object):
             
         #
         return pd.DataFrame.from_dict(data, orient='index', columns=columns)
+
+
+class _Spectrum:
+    """Wrap Spectrum basic info, for create new spectra.
+    """
+    def __init__(self, sp: Spectrum):
+        self.name = sp.name
+        self.parameters = sp.parameters
+        self.axes = sp.axes
+        self.dtype = sp.dtype
+        self.stype = sp.stype
 
 
 def _map_fn(low, high, bins, ch):
